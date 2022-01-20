@@ -10,5 +10,4 @@ content/*
 content/themes/
 
 content/plugins/*
-!content/plugins/
 !content/plugins/opuces
