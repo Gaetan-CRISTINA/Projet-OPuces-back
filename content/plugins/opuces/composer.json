@@ -1,0 +1,10 @@
+{
+    "autoload": {
+        "psr-4" : {
+            "OPuces\\" : "./class"
+        }
+    },
+    "config": {
+        "vendor-dir": "vendor-opuces"
+    }
+}
