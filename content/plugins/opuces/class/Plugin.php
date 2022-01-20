@@ -394,14 +394,23 @@ class Plugin
         }
     }
 
+
+    /**
+     * Activation Plugin
+     * add capabilities to Administrator
+     * 
+     */
     public function activate()
     {
-      
         $this->addCapAdmin(['classified']);
-        
+          
 
     }
-
+    
+    /**
+     * Method to desactivate Plugin
+     * 
+     */
     public function deactivate()
     {
 
@@ -413,7 +422,7 @@ class Plugin
         //! Attention, sans cette opération le CPT recipe va disparaire
         //! en effet, nous avons définis un "capability_type" pour ce dernier
         //! et l'adminstrateur ne vas pas avoir automatiquement les droits 
-        
+
         $role = get_role('administrator');
         foreach ($customCapArray as $customCap) {
             $role->add_cap('delete_others_' . $customCap . 's');
