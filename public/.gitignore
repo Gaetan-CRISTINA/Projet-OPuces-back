@@ -7,7 +7,7 @@ wp-config.php
 content/*
 !content/
 
-content/themes/
-
+content/themes/*
+!content/themes/opuces
 content/plugins/*
 !content/plugins/opuces
