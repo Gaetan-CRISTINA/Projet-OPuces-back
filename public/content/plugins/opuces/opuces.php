@@ -7,12 +7,13 @@
  */
 
 use OPuces\Plugin;
+use OPuces\API;
 // use OPuces\API;
 
 require __DIR__ . '/vendor-opuces/autoload.php';
 
 $oPuces = new Plugin();
-// $api = new API();
+$api = new API();
 
 register_activation_hook(
     __FILE__,

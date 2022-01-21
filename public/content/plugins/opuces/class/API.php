@@ -2,6 +2,7 @@
 
 namespace OPuces;
 
+use WP_REST_Request;
 class Api {
 
     protected $baseURI;
@@ -26,11 +27,41 @@ class Api {
         );
     }
 
-    public function createClassified()
+    public function createClassified(WP_REST_Request $request)
     {
-        echo "toto";
-    }
+        $title = $request->get_param('title');
+        $description = $request->get_param('content');
+        $author = $request->get_param('author');
+        $price = $request->get_param('price');
 
-    
+        // récupération de l'utilisateur ayant envoyé la requête
+        // $user = wp_get_current_user();
+
+        $classifiedCreateResult = wp_insert_post(
+            [
+                    'post_title' => $title,
+                    'post_content' => $description,
+                    'post_author'  =>  $author,
+                    'post_status' => 'publish',
+                    'post_type' => 'classified',
+                ]
+        );
+        if (is_int($classifiedCreateResult)) {
+            if ($price > 0)
+            {
+                $keyMeta ='price';
+                add_post_meta($classifiedCreateResult, $keyMeta, $price ,$unique = true);
+            }
+            return [
+                    'success' => true,
+                    'title' => $title
+                    
+                ];
+        }
+        return
+            [
+                'success' => false
+            ];
+    } 
 
 }
