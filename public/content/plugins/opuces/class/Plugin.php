@@ -2,13 +2,21 @@
 
 namespace OPuces;
 
+
 class Plugin 
 { 
+    
     public function __construct()
     {
+        
+
         add_action(
             'init',
             [$this, 'createClassifiedPostType']
+        );
+        add_action(
+            'init',
+            [$this, 'createUserInfoCustomTable']
         );
         add_action(
             'init',
@@ -27,6 +35,32 @@ class Plugin
             [$this, 'createSellerRateCustomTaxonomy']
         );
     }
+    // create additionnal custome table  userInfo
+
+    public function createUserInfoCustomTable(){
+            //Todo foreignkey
+        $sql = " CREATE TABLE user_table (
+                id bigint(24) unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                adress1 varchar(50) ,
+                adress2 varchar(50) ,
+                zipcode int(10) NOT NULL,
+                city varchar(50) NOT NULL, 
+                country varchar(50) ,
+                latitude varchar(24) ,
+                longitude varchar(24) ,
+                phone_number bigint(16) ,
+                rate tinyint(1) ,
+                wp_users_id bigint(24) unsigned NOT NULL,
+                created_at datetime NOT NULL ON UPDATE CURRENT_TIMESTAMP,
+                updated_at datetime NULL,
+                FOREIGN KEY(wp_users_id) REFERENCES wp_users(id) 
+                );
+            ";
+                
+                require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+                dbDelta($sql);
+    }
+
 
     //create Classified
     public function createClassifiedPostType()
