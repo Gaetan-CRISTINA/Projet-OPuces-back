@@ -3,7 +3,7 @@
 namespace OPuces;
 
 class Plugin 
-{
+{ 
     public function __construct()
     {
         add_action(
@@ -102,6 +102,21 @@ class Plugin
         $taxonomy = 'DeliveryMethod';
         foreach ($addTaxos as $term) {
             wp_insert_term($term, $taxonomy, $args = array()); //$args sera utilisé lors de l'utilisation de sous catégories
+            
+            /**
+             * creation d'une meta donnée
+             *  add_term_meta  a besoin de l'id de la taxo concerné, d'une clé (par defaut elle n est pas unique) et d'une valeur
+             * 
+             */
+
+            // recuperation du term_id pour creer la metadonnée
+
+            $term_id = get_term_by('name', $term, $taxonomy);
+            $termMeta = $term_id->term_id;
+            $keyMeta ='price';
+            $valueMeta = 100;
+
+            add_term_meta($termMeta, $keyMeta, $valueMeta ,$unique = true);
         }
     }
 
