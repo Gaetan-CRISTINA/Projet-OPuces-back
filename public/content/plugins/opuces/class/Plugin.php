@@ -40,7 +40,7 @@ class Plugin
     public function createUserInfoCustomTable(){
             //Todo foreignkey
         $sql = " CREATE TABLE user_table (
-                id bigint(24) unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                ID bigint(20) unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
                 adress1 varchar(50) ,
                 adress2 varchar(50) ,
                 zipcode int(10) NOT NULL,
@@ -50,13 +50,13 @@ class Plugin
                 longitude varchar(24) ,
                 phone_number bigint(16) ,
                 rate tinyint(1) ,
-                wp_users_id bigint(24) unsigned NOT NULL,
                 created_at datetime NOT NULL ON UPDATE CURRENT_TIMESTAMP,
                 updated_at datetime NULL,
-                FOREIGN KEY(wp_users_id) REFERENCES wp_users(id) 
+                FOREIGN KEY(ID) REFERENCES wp_users(ID)
                 );
             ";
-                
+                                // wp_users_id bigint(24),
+                                // FOREIGN KEY(wp_users_id) REFERENCES wp_users(id)
                 require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
                 dbDelta($sql);
     }
