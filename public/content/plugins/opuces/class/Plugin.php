@@ -34,13 +34,42 @@ class Plugin
             'init',
             [$this, 'createSellerRateCustomTaxonomy']
         );
+        // add_action(
+        //     'rest_api_init',
+        //     [$this, 'opucesRegisterRestFields']
+        //);
     }
+    // https://developer.wordpress.org/reference/functions/register_rest_field/
+
+    // public function opucesRegisterRestFields(){
+ 
+    //     register_rest_field('classified',
+    //         'classifiedPrice',
+    //         array(
+    //             'get_callback'    => 'getClassifiedPrice',
+    //             'update_callback' => null,
+    //             'schema'          => null
+    //         )
+    //     );
+          
+    // }
+
+    // public function getClassifiedPrice($object,$field_name,$request){
+    //     $terms_result = array();
+    //     $terms =  wp_get_post_terms( $object['id'], 'classifiedPrice');
+    //     foreach ($terms as $term) {
+    //         $terms_result[$term->term_id] = array($term->name,get_term_link($term->term_id));
+    //     }
+    //     return $terms_result;
+    //}
+
+
     // create additionnal custome table  userInfo
 
     public function createUserInfoCustomTable(){
             //Todo foreignkey
         $sql = " CREATE TABLE user_table (
-                userID bigint(20) unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                userID bigint(20) unsigned NOT NULL PRIMARY KEY,
                 adress1 varchar(50) ,
                 adress2 varchar(50) ,
                 zipcode int(10) NOT NULL,

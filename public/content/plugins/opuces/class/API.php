@@ -49,7 +49,7 @@ class Api {
         if (is_int($classifiedCreateResult)) {
             if ($price > 0)
             {
-                $keyMeta ='price';
+                $keyMeta ='classifiedPrice';
                 add_post_meta($classifiedCreateResult, $keyMeta, $price ,$unique = true);
             }
             return [
