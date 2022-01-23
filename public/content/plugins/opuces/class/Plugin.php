@@ -40,7 +40,7 @@ class Plugin
     public function createUserInfoCustomTable(){
             //Todo foreignkey
         $sql = " CREATE TABLE user_table (
-                ID bigint(20) unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                userID bigint(20) unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
                 adress1 varchar(50) ,
                 adress2 varchar(50) ,
                 zipcode int(10) NOT NULL,
@@ -51,8 +51,7 @@ class Plugin
                 phone_number bigint(16) ,
                 rate tinyint(1) ,
                 created_at datetime NOT NULL ON UPDATE CURRENT_TIMESTAMP,
-                updated_at datetime NULL,
-                FOREIGN KEY(ID) REFERENCES wp_users(ID)
+                updated_at datetime NULL
                 );
             ";
                                 // wp_users_id bigint(24),
@@ -452,8 +451,54 @@ class Plugin
     public function activate()
     {
         $this->addCapAdmin(['classified']);
-          
+        $this->registerUserRole();
+        $this->registerModerateurRole();
 
+    }
+    public function registerUserRole()
+    {
+        add_role(
+            // identifiant du role 
+            'user',
+            // libellé
+            'Utilisateur',
+            // liste des autorisatrions
+            [
+                'delete_user' => false,
+                'delete_others_user' => false,
+                'delete_private_user' => false,
+                'delete_published_user' => false,
+                'edit_user' => true,
+                'edit_others_user' => false,
+                'edit_private_user' => false,
+                'edit_published_user' => true,
+                'publish_user' => false,
+                'read_private_user' => false,
+            ]
+        );
+    }
+
+    public function registerModerateurRole()
+    {
+        add_role(
+            // identifiant du role 
+            'moderator',
+            // libellé
+            'Moderateur',
+            // liste des autorisatrions
+            [
+                'delete_chief' => false,
+                'delete_others_chief' => false,
+                'delete_private_chief' => false,
+                'delete_published_chief' => false,
+                'edit_chief' => true,
+                'edit_others_chief' => false,
+                'edit_private_chief' => false,
+                'edit_published_chief' => true,
+                'publish_chief' => false,
+                'read_private_chief' => false,
+            ]
+        );
     }
     
     /**
@@ -468,9 +513,6 @@ class Plugin
     public function addCapAdmin($customCapArray)
     {
         // methode qui nous permet d'ajouter les droits sur le CPT recipe pour le role administrateur
-        //! Attention, sans cette opération le CPT recipe va disparaire
-        //! en effet, nous avons définis un "capability_type" pour ce dernier
-        //! et l'adminstrateur ne vas pas avoir automatiquement les droits 
 
         $role = get_role('administrator');
         foreach ($customCapArray as $customCap) {
