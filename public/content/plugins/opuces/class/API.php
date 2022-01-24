@@ -73,9 +73,56 @@ class Api {
             ]
         );
 
+        register_rest_route(
+            'opuces/v1',
+            'crud-user-table',
+            [
+                'methods' => 'post',
+                'callback' => [$this, 'crudUserTable'] 
+            ]
+        );
 
     }
+      /**
+       * crudUserTable
+       *  create & update user_table
+       * $request: {"user_id","adress1","adress2","zipcode","city","country","latitude","longitude",
+       * "rate", "phone_number", "crud" }
+       * crud : C ==> insert ; U ==> update
+       * return: succes = true/false
+       * 
+	   */  
+    public function crudUserTable(WP_REST_Request $request)
+    {
+        $crud = $request->get_param('crud');
+        $data = [
+            'userID' => $request->get_param('userID'), //! Modifier pour supprimer le user forcé et mettre wp_current_user
+            'adress1' => $request->get_param('adress1'),
+            'adress2' => $request->get_param('adress2'),
+            'zipcode' => $request->get_param('zipcode'),
+            'city' => $request->get_param('city'),
+            'country' => $request->get_param('country'),
+            'phone_number' => $request->get_param('phone_number'),
+            'latitude' => $request->get_param('latitude'),
+            'longitude' => $request->get_param('longitude'),
+            'rate' => $request->get_param('rate')
+          ];
 
+        global $wpdb;
+        
+        if ($crud === 'I') {
+            $wpdb->insert('user_table', $data);
+        } else{
+            if ($crud === 'U') {
+                $userID = $request->get_param('userID');
+                $where = 
+                [
+                    'userID' => $userID
+                ];
+                $wpdb->update('user_table', $data, $where);
+            }
+        }
+    }
     public function createUser(WP_REST_Request $request)
     {
         $userName = $request->get_param('userName');
