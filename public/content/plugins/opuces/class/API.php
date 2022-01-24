@@ -4,6 +4,7 @@ namespace OPuces;
 
 use WP_REST_Request;
 use WP_USER;
+
 class Api {
 
     protected $baseURI;
@@ -81,12 +82,14 @@ class Api {
         $email = $request->get_param('email');
         $password = $request->get_param('password');
         $confirmPassword = $request->get_param('confirmPassword');
+        $image = [$this, 'uploadImage'];
 
         if($password == $confirmPassword){
             $createUserResult = wp_create_user(
                 $userName,
                 $email,
-                $password
+                $password,
+                $image
             );
         } else {
             echo "Passwords don't Match";
@@ -100,7 +103,8 @@ class Api {
                 'userId' => $createUserResult,
                 'userName' => $userName,
                 'email' => $email,
-                'role' => 'user'
+                'role' => 'user',
+                'image' => $image,
             ];
         } else {
             return [ 'success' => false,
@@ -113,9 +117,10 @@ class Api {
     {
         $title = $request->get_param('title');
         $description = $request->get_param('content');
-        $author = $request->get_param('author');
+        $author = $request->get_param('author'); //! Modifier pour supprimer le user forcé et mettre wp_current_user
         $price = $request->get_param('price');
         $type = $request->get_param('type');
+
         $imageId = $request->get_param('imageId');
 
         // récupération de l'utilisateur ayant envoyé la requête
@@ -178,7 +183,7 @@ class Api {
         $user = wp_get_current_user();
 
         if (
-            in_array ('seller', (array) $user->roles) ||
+            in_array ('user', (array) $user->roles) ||
             in_array ('administrator', (array) $user->roles) ||
             in_array ('moderateur', (array) $user->roles)
         ) {
