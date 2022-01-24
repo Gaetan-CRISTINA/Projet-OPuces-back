@@ -541,7 +541,7 @@ class Plugin
 
     public function addCapAdmin($customCapArray)
     {
-        // methode qui nous permet d'ajouter les droits sur le CPT recipe pour le role administrateur
+        // methode qui nous permet d'ajouter les droits sur le CPT classified pour le role administrateur
 
         $role = get_role('administrator');
         foreach ($customCapArray as $customCap) {
