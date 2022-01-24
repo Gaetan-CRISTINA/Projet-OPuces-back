@@ -75,10 +75,18 @@ class Api {
 
         register_rest_route(
             'opuces/v1',
-            'crud-user-table',
+            'user-table',
             [
                 'methods' => 'post',
                 'callback' => [$this, 'crudUserTable'] 
+            ]
+        );
+        register_rest_route(
+            'opuces/v1',
+            'user-table',
+            [
+                'methods' => 'get',
+                'callback' => [$this, 'getUserTable'] 
             ]
         );
 
@@ -126,6 +134,11 @@ class Api {
         // sans crud
         $userID = $request->get_param('userID');
         $table_name = 'user_table';
+        // prepare <==> prepare  de pdo 
+        // %s – string (value is escaped and wrapped in quotes)
+        // %d – integer
+        // %f – float
+        // %% – % sign
         $user_count = $wpdb->get_var($wpdb->prepare("SELECT count(*) FROM `$table_name` WHERE userID = %d", $userID));
 
             if ($user_count == 0) {
@@ -138,6 +151,26 @@ class Api {
         return $user_count;
 
     }
+        /**
+       *  getUserTable
+       *  get field of user_table
+       * $request: {"user_id",}
+       * return: succes = true/false
+       * 
+	   */  
+      public function getUserTable(WP_REST_Request $request)
+      {
+ 
+          global $wpdb;
+          
+          $userID = $request->get_param('userID');
+          $table_name = 'user_table';
+          $user_count = $wpdb->get_results($wpdb->prepare("SELECT * FROM `$table_name` WHERE userID = %d", $userID));
+  
+          return $user_count;
+  
+      }
+  
     public function createUser(WP_REST_Request $request)
     {
         $userName = $request->get_param('userName');
