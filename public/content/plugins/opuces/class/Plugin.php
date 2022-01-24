@@ -83,8 +83,8 @@ class Plugin
                 updated_at datetime NULL
                 );
             ";
-                                // wp_users_id bigint(24),
-                                // FOREIGN KEY(wp_users_id) REFERENCES wp_users(id)
+                // wp_users_id bigint(24),
+                // FOREIGN KEY(wp_users_id) REFERENCES wp_users(id)
                 require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
                 dbDelta($sql);
     }
