@@ -94,7 +94,7 @@ class Api {
 	   */  
     public function crudUserTable(WP_REST_Request $request)
     {
-        $crud = $request->get_param('crud');
+        // $crud = $request->get_param('crud');
         $data = [
             'userID' => $request->get_param('userID'), //! Modifier pour supprimer le user forcé et mettre wp_current_user
             'adress1' => $request->get_param('adress1'),
@@ -110,18 +110,33 @@ class Api {
 
         global $wpdb;
         
-        if ($crud === 'I') {
-            $wpdb->insert('user_table', $data);
-        } else{
-            if ($crud === 'U') {
-                $userID = $request->get_param('userID');
-                $where = 
-                [
-                    'userID' => $userID
-                ];
-                $wpdb->update('user_table', $data, $where);
-            }
-        }
+        // if ($crud === 'I') {
+        //     $wpdb->insert('user_table', $data);
+        // } else{
+        //     if ($crud === 'U') {
+        //         $userID = $request->get_param('userID');
+        //         $where = 
+        //         [
+        //             'userID' => $userID
+        //         ];
+        //         $wpdb->update('user_table', $data, $where);
+        //     }
+        // }
+
+        // sans crud
+        $userID = $request->get_param('userID');
+        $table_name = 'user_table';
+        $user_count = $wpdb->get_var($wpdb->prepare("SELECT count(*) FROM `$table_name` WHERE userID = %d", $userID));
+
+            if ($user_count == 0) {
+                $wpdb->insert('user_table', $data);
+            }   else{
+                     $where = 
+                     ['userID' => $userID];
+                     $wpdb->update('user_table', $data, $where);
+                }
+        return $user_count;
+
     }
     public function createUser(WP_REST_Request $request)
     {
