@@ -21,10 +21,10 @@ class Api {
 
         register_rest_route(
             'opuces/v1', // nom de l'API
-            'create-classified',
+            'save-classified',
             [
                 'methods' => 'post',
-                'callback' => [$this, 'createClassified'],
+                'callback' => [$this, 'saveClassified'],
                 'permission_callback' => '__return_true',
             ]
         );
@@ -202,70 +202,93 @@ class Api {
             ];
             }
      }
+      /**
+       * saveClassified
+       *  create & update post classified
+       * $request: {post_id,"content","title",author,price,[ProductCategory],[DeliveryMethod],"ProductState"
+       * return: succes = creation/modif
+       * 
+	   */  
 
-    public function createClassified(WP_REST_Request $request)
+    public function saveClassified(WP_REST_Request $request)
     {
         $idProduct =[];
+        $idDelivery =[];
         $title = $request->get_param('title');
         $description = $request->get_param('content');
         $author = $request->get_param('author'); //! Modifier pour supprimer le user forcé et mettre wp_current_user
         $price = $request->get_param('price');
-        $type = $request->get_param('type');
         $idProduct = $request->get_param('ProductCategorie');
         $idDelivery = $request->get_param('DeliveryMethod');
         $idState = $request->get_param('ProductState');
+        $post_id = $request->get_param('post_id');
         $imageId = $request->get_param('imageId');
-
-        // constitution du tableau tax_input
-        // if ($idProduct){
-        //     $taxo =['ProductCategorie' => $idProduct ];
-        // }
-        // if ($idDelivery){
-        //     $taxo =['DeliveryMethod' => $idDelivery ];
-        // }
-        // if ($idState){
-        //     $taxo =['ProductState' => $idState ];
-        // }
+        
         // récupération de l'utilisateur ayant envoyé la requête
+
+        // on regarde si c'est pour une creation ou une modification
+        $postStatus = get_post_status($post_id);
+        $argsPost = 
+        [
+            'ID' => $post_id,
+            'post_title' => $title,
+            'post_content' => $description,
+            'post_author'  =>  $author,
+            'post_status' => 'publish',
+            'post_type' => 'classified',
+        ];
         $user = wp_get_current_user();
-
-        $classifiedCreateResult = wp_insert_post(
-            [
-                    'post_title' => $title,
-                    'post_content' => $description,
-                    'post_author'  =>  $author,
-                    'post_status' => 'publish',
-                    'post_type' => 'classified',
-                    // 'tax_input' => $taxo,
-                ]
-        );
-        // foreach ($idProduct as $term) {
-            wp_set_object_terms($classifiedCreateResult, $idProduct, 'ProductCategory');
-        // }
-        wp_set_object_terms( $classifiedCreateResult, $idDelivery, 'DeliveryMethod' );
-        wp_set_object_terms( $classifiedCreateResult, $idState, 'ProductState' );
-
-        if (is_int($classifiedCreateResult)) {
-            if ($price > 0)
-            {
-                $keyMeta ='classifiedPrice';
-                add_post_meta($classifiedCreateResult, $keyMeta, $price ,$unique = true);
-            }
-            return [
-                    'success' => true,
-                    'title' => $title,
-                    'description' => $description,
-                    'type' => $type,
-                    'author' => $idProduct,
-                    
-                ];
+        if (!$postStatus) 
+        {
+            $classifiedSaveResult = wp_insert_post
+            (
+                $argsPost
+            );
         }
-        return
-            [
-                'success' => false
-            ];
-    } 
+        else 
+        {
+            $user = wp_get_current_user();
 
+            $classifiedSaveResult = wp_update_post
+            (
+                $argsPost
+            );
+        }
+            // si pas d erreur je met a jout taxo & custum field
+            if (!is_wp_error($classifiedSaveResult)) {
+                $success = true;
+            // les 3 premiers wp_set_object servent a effacer les taxo existantes si elles existent
+                wp_set_object_terms($classifiedSaveResult, null, 'ProductCategory');
+                wp_set_object_terms($classifiedSaveResult, null, 'DeliveryMethod');
+                wp_set_object_terms($classifiedSaveResult, null, 'ProductState');
+                wp_set_object_terms($classifiedSaveResult, $idProduct, 'ProductCategory');
+                wp_set_object_terms($classifiedSaveResult, $idDelivery, 'DeliveryMethod');
+                wp_set_object_terms($classifiedSaveResult, $idState, 'ProductState');
+    
+                if ($price > 0) 
+                {
+                    $keyMeta ='classifiedPrice';
+                    // test si une meta existe
+                    if (get_post_meta($classifiedSaveResult, $keyMeta, true ) ) {
+                        update_post_meta($classifiedSaveResult, $keyMeta, $price);
+                    }
+                    else {
+                        add_post_meta($classifiedSaveResult, $keyMeta, $price, $unique = true);
+                    }
+                }
+            }
+            else {
+            $success = false;
+            }
+
+            return 
+            [
+            'success' => $success,
+            'postid' => $classifiedSaveResult,
+            'poststatus' => $postStatus
+            ];
+    }
+  
     // demande de token pour nouveau mot de passe
     public function askNewPassword(WP_REST_Request $request)
     {
