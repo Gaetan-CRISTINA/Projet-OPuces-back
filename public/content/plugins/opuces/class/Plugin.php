@@ -409,6 +409,11 @@ class Plugin
         }
     }
 
+    public function createCustomTaxonomy ()
+    {
+        
+    }
+
 
     /**
      * Activation Plugin

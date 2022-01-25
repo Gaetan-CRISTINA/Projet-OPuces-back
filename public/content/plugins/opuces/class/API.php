@@ -3,6 +3,8 @@
 namespace OPuces;
 
 use WP_REST_Request;
+use WP_USER;
+
 class Api {
 
     protected $baseURI;
@@ -18,50 +20,29 @@ class Api {
         $this->baseURI = dirname($_SERVER['SCRIPT_NAME']);
 
         register_rest_route(
-            'opuces/v1', // nom de l'API
-            'create-classified',
+            'opuces/v1', // API Name
+            'create-custom-taxonomy', // name of route
             [
                 'methods' => 'post',
-                'callback' => [$this, 'createClassified']
+                'callback' => [$this, 'createCustomTaxonomy']
             ]
         );
+
+
     }
 
-    public function createClassified(WP_REST_Request $request)
+
+
+    public function createCustomTaxonomy(WP_REST_Request $request)
     {
-        $title = $request->get_param('title');
-        $description = $request->get_param('content');
-        $author = $request->get_param('author');
-        $price = $request->get_param('price');
+        $name = $request->get_param('name');
+        $slug = $request->get_param('slug');
+        $parentCategory = $request->get_param('parentCategory');
+        $description = $request->get_param('description');
 
-        // récupération de l'utilisateur ayant envoyé la requête
-        // $user = wp_get_current_user();
+    }
 
-        $classifiedCreateResult = wp_insert_post(
-            [
-                    'post_title' => $title,
-                    'post_content' => $description,
-                    'post_author'  =>  $author,
-                    'post_status' => 'publish',
-                    'post_type' => 'classified',
-                ]
-        );
-        if (is_int($classifiedCreateResult)) {
-            if ($price > 0)
-            {
-                $keyMeta ='price';
-                add_post_meta($classifiedCreateResult, $keyMeta, $price ,$unique = true);
-            }
-            return [
-                    'success' => true,
-                    'title' => $title
-                    
-                ];
-        }
-        return
-            [
-                'success' => false
-            ];
-    } 
+
+
 
 }
