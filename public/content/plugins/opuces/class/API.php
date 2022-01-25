@@ -177,15 +177,16 @@ class Api {
         $email = $request->get_param('email');
         $password = $request->get_param('password');
         $confirmPassword = $request->get_param('confirmPassword');
-        $image = [$this, 'uploadImage'];
-
-        if($password == $confirmPassword){
-            $createUserResult = wp_create_user(
-                $userName,
-                $email,
-                $password,
-                $image
-            );
+        // $image = [$this, 'uploadImage'];
+        $user_data = array(
+            'ID' => '',
+            'user_login' => $userName,
+            'user_pass' => $password,
+            'user_email' => $email,
+            'role' => 'user'
+        );
+        if($password === $confirmPassword){
+            $createUserResult = wp_insert_user($user_data);
         } else {
             echo "Passwords don't Match";
         }
@@ -199,7 +200,7 @@ class Api {
                 'userName' => $userName,
                 'email' => $email,
                 'role' => 'user',
-                'image' => $image,
+                // 'image' => $image,
             ];
         } else {
             return [ 'success' => false,
