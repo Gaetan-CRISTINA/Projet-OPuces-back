@@ -3,6 +3,7 @@
 namespace OPuces;
 
 use WP_REST_Request;
+use WP_Error;
 
 class Api {
 
@@ -11,6 +12,7 @@ class Api {
     public function __construct()
     {
         add_action('rest_api_init', [$this, 'initialize']);
+
     }    
     
     public function initialize()
@@ -28,13 +30,13 @@ class Api {
             ]
         );
 
-        //route for modification of a taxonomy
+        //route to update a taxonomy
         register_rest_route(
             'opuces/v1', // API Name
-            'modify-taxonomy', // name of route
+            'update-taxonomy', // name of route
             [
-                'methods' => 'post',
-                'callback' => [$this, 'modifyTaxonomy']
+                'methods' => 'put',
+                'callback' => [$this, 'updateTaxonomy']
             ]
         );
 
@@ -85,6 +87,37 @@ class Api {
 
 
     } //<-- end of public function createCustomTaxonomy
+
+
+    public function updateTaxonomy(WP_REST_Request $request)
+    {
+        // retrieving what has been sent to the api on the endpoint /opuces/v1/update-taxonomy in POST
+        $categoryId = $request->get_param('categoryId');
+        $name = $request->get_param('name');
+        $parentCategory = $request->get_param('parentCategory');
+        $description = $request->get_param('description');
+
+        $updateTaxonomy = wp_update_term($categoryId, $name, [
+            'alias_of' => '',
+            'description' => $description,
+            'parent' => $parentCategory,
+            'slug' => ''
+            
+        ]
+
+        );
+
+        if ( ! is_wp_error($updateTaxonomy))
+        {
+            echo 'Success!';
+        } else {
+            return [
+            'success' => false,
+            'error' => $updateTaxonomy
+            ];
+        };
+    
+    } // <-- end of public function updateTaxonomy
 
 
 
