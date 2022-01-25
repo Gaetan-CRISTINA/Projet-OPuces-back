@@ -516,16 +516,16 @@ class Plugin
             'Moderateur',
             // liste des autorisatrions
             [
-                'delete_chief' => false,
-                'delete_others_chief' => false,
-                'delete_private_chief' => false,
-                'delete_published_chief' => false,
-                'edit_chief' => true,
-                'edit_others_chief' => false,
-                'edit_private_chief' => false,
-                'edit_published_chief' => true,
-                'publish_chief' => false,
-                'read_private_chief' => false,
+                'delete_moderator' => false,
+                'delete_others_moderator' => false,
+                'delete_private_moderator' => false,
+                'delete_published_moderator' => false,
+                'edit_moderator' => true,
+                'edit_others_moderator' => false,
+                'edit_private_moderator' => false,
+                'edit_published_moderator' => true,
+                'publish_moderator' => false,
+                'read_private_moderator' => false,
             ]
         );
     }
@@ -541,7 +541,7 @@ class Plugin
 
     public function addCapAdmin($customCapArray)
     {
-        // methode qui nous permet d'ajouter les droits sur le CPT recipe pour le role administrateur
+        // methode qui nous permet d'ajouter les droits sur le CPT classified pour le role administrateur
 
         $role = get_role('administrator');
         foreach ($customCapArray as $customCap) {
