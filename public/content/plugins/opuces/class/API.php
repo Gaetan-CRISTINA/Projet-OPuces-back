@@ -205,6 +205,7 @@ class Api {
 
     public function createClassified(WP_REST_Request $request)
     {
+        $idProduct =[];
         $title = $request->get_param('title');
         $description = $request->get_param('content');
         $author = $request->get_param('author'); //! Modifier pour supprimer le user forcé et mettre wp_current_user
@@ -238,7 +239,9 @@ class Api {
                     // 'tax_input' => $taxo,
                 ]
         );
-        wp_set_object_terms( $classifiedCreateResult, $idProduct, 'ProductCategory' );
+        // foreach ($idProduct as $term) {
+            wp_set_object_terms($classifiedCreateResult, $idProduct, 'ProductCategory');
+        // }
         wp_set_object_terms( $classifiedCreateResult, $idDelivery, 'DeliveryMethod' );
         wp_set_object_terms( $classifiedCreateResult, $idState, 'ProductState' );
 
@@ -253,7 +256,7 @@ class Api {
                     'title' => $title,
                     'description' => $description,
                     'type' => $type,
-                    'author' => $author,
+                    'author' => $idProduct,
                     
                 ];
         }
