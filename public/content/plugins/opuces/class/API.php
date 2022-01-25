@@ -24,7 +24,8 @@ class Api {
             'create-classified',
             [
                 'methods' => 'post',
-                'callback' => [$this, 'createClassified']
+                'callback' => [$this, 'createClassified'],
+                'permission_callback' => '__return_true',
             ]
         );
 
@@ -33,7 +34,8 @@ class Api {
             'lost-password',
             [
                 'methods' => 'post',
-                'callback' => [$this, 'askNewPassword']
+                'callback' => [$this, 'askNewPassword'],
+                'permission_callback' => '__return_true',
             ]
         );
 
@@ -42,7 +44,8 @@ class Api {
             'create-new-password',
             [
                 'methods' => 'patch',
-                'callback' => [$this, 'sendLinkCreateNewPassword']
+                'callback' => [$this, 'sendLinkCreateNewPassword'],
+                'permission_callback' => '__return_true',
             ]
         );
 
@@ -51,7 +54,8 @@ class Api {
             'save-comment',
             [
                 'methods' => 'post',
-                'callback' => [$this, 'saveComment']
+                'callback' => [$this, 'saveComment'],
+                'permission_callback' => '__return_true',
             ]
         );
 
@@ -60,7 +64,8 @@ class Api {
             'upload-image',
             [
                 'methods' => 'post',
-                'callback' => [$this, 'uploadImage']
+                'callback' => [$this, 'uploadImage'],
+                'permission_callback' => '__return_true',
             ]
         );
 
@@ -69,7 +74,8 @@ class Api {
             'create-user',
             [
                 'methods' => 'post',
-                'callback' => [$this, 'createUser'] 
+                'callback' => [$this, 'createUser'] ,
+                'permission_callback' => '__return_true',
             ]
         );
 
@@ -78,7 +84,8 @@ class Api {
             'user-table',
             [
                 'methods' => 'post',
-                'callback' => [$this, 'crudUserTable'] 
+                'callback' => [$this, 'crudUserTable'] ,
+                'permission_callback' => '__return_true',
             ]
         );
         register_rest_route(
@@ -86,7 +93,8 @@ class Api {
             'user-table',
             [
                 'methods' => 'get',
-                'callback' => [$this, 'getUserTable'] 
+                'callback' => [$this, 'getUserTable'] ,
+                'permission_callback' => '__return_true',
             ]
         );
 
@@ -96,8 +104,7 @@ class Api {
        *  create & update user_table
        * $request: {"user_id","adress1","adress2","zipcode","city","country","latitude","longitude",
        * "rate", "phone_number", "crud" }
-       * crud : C ==> insert ; U ==> update
-       * return: succes = true/false
+       * return: succes = creation/modif
        * 
 	   */  
     public function crudUserTable(WP_REST_Request $request)
@@ -118,20 +125,6 @@ class Api {
 
         global $wpdb;
         
-        // if ($crud === 'I') {
-        //     $wpdb->insert('user_table', $data);
-        // } else{
-        //     if ($crud === 'U') {
-        //         $userID = $request->get_param('userID');
-        //         $where = 
-        //         [
-        //             'userID' => $userID
-        //         ];
-        //         $wpdb->update('user_table', $data, $where);
-        //     }
-        // }
-
-        // sans crud
         $userID = $request->get_param('userID');
         $table_name = 'user_table';
         // prepare <==> prepare  de pdo 
@@ -143,12 +136,14 @@ class Api {
 
             if ($user_count == 0) {
                 $wpdb->insert('user_table', $data);
+                $succes = 'insert';
             }   else{
                      $where = 
                      ['userID' => $userID];
                      $wpdb->update('user_table', $data, $where);
+                     $succes ='update';
                 }
-        return $user_count;
+        return $succes;
 
     }
         /**
@@ -215,9 +210,21 @@ class Api {
         $author = $request->get_param('author'); //! Modifier pour supprimer le user forcé et mettre wp_current_user
         $price = $request->get_param('price');
         $type = $request->get_param('type');
-
+        $idProduct = $request->get_param('ProductCategorie');
+        $idDelivery = $request->get_param('DeliveryMethod');
+        $idState = $request->get_param('ProductState');
         $imageId = $request->get_param('imageId');
 
+        // constitution du tableau tax_input
+        // if ($idProduct){
+        //     $taxo =['ProductCategorie' => $idProduct ];
+        // }
+        // if ($idDelivery){
+        //     $taxo =['DeliveryMethod' => $idDelivery ];
+        // }
+        // if ($idState){
+        //     $taxo =['ProductState' => $idState ];
+        // }
         // récupération de l'utilisateur ayant envoyé la requête
         $user = wp_get_current_user();
 
@@ -228,8 +235,13 @@ class Api {
                     'post_author'  =>  $author,
                     'post_status' => 'publish',
                     'post_type' => 'classified',
+                    // 'tax_input' => $taxo,
                 ]
         );
+        wp_set_object_terms( $classifiedCreateResult, $idProduct, 'ProductCategory' );
+        wp_set_object_terms( $classifiedCreateResult, $idDelivery, 'DeliveryMethod' );
+        wp_set_object_terms( $classifiedCreateResult, $idState, 'ProductState' );
+
         if (is_int($classifiedCreateResult)) {
             if ($price > 0)
             {
@@ -242,9 +254,6 @@ class Api {
                     'description' => $description,
                     'type' => $type,
                     'author' => $author,
-                    'price' => $price,
-                    'user' => $user,
-                    'image' => $imageId
                     
                 ];
         }
