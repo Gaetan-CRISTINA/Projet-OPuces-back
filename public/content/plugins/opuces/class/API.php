@@ -82,7 +82,7 @@ class Api {
         $email = $request->get_param('email');
         $password = $request->get_param('password');
         $confirmPassword = $request->get_param('confirmPassword');
-        // $image = [$this, 'uploadImage'];
+        
         $user_data = array(
             'ID' => '',
             'user_login' => $userName,
