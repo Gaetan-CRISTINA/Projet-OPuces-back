@@ -323,7 +323,7 @@ class Plugin
                     'Accessoires'
                 ];
 
-                $term_id = get_term_by('name','Vêtement','ProductCategory');
+                $term_id = get_term_by('name','Mode','ProductCategory');
                 $categoryIdParent = $term_id->term_id;
 
                 $args = [
