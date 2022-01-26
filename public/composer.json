@@ -24,6 +24,7 @@
         "wpackagist-theme/twentytwentyone": "*",
         "wpackagist-plugin/user-role-editor": "*",
         "wpackagist-plugin/jwt-authentication-for-wp-rest-api": "^1.2",
+        "wpackagist-plugin/wp-rest-api-controller": "*",
         "yoast/phpunit-polyfills": "^1.0"
     },
 
@@ -47,21 +48,19 @@
 
         "wp-install-application-passwords": "wp plugin install application-passwords --activate",
         "wp-install-jwt": "wp plugin install jwt-authentication-for-wp-rest-api --activate",
-
+        "wp-install-wp-rest-api-controller": "wp plugin install wpackagist-plugin/wp-rest-api-controller --activate",
         "wp-install-classic-editor": "wp plugin install classic-editor --activate",
         "wp-install-html-editor-syntax-highlighter": "wp plugin install html-editor-syntax-highlighter --activate",
 
         "wp-install-all": [
             "wp plugin install classic-editor --activate",
             "wp plugin install html-editor-syntax-highlighter --activate",
-
+            "wp plugin install wp-rest-api-controller --activate",
             "wp plugin install user-role-editor --activate",
             "wp plugin install view-admin-as --activate",
             "wp plugin install jwt-authentication-for-wp-rest-api --activate",
-
             "wp plugin install fakerpress --activate",
             "wp plugin install custom-post-type-ui --activate",
-            "wp plugin install advanced-custom-fields --activate",
             "wp plugin install acf-to-rest-api --activate"
         ]
     }
