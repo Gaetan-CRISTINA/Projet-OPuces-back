@@ -28,6 +28,16 @@ class Api {
                 'callback' => [$this, 'createCustomTaxonomy']
             ]
         );
+
+        register_rest_route(
+
+            'opuces/v1', // API Name
+            'update-taxonomy', // name of route
+            [
+                'methods' => 'put',
+                'callback' => [$this, 'createCustomTaxonomy']
+            ]
+        );
         register_rest_route(
             'opuces/v1', // nom de l'API
             'save-classified',
