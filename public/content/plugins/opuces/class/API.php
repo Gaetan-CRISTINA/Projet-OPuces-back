@@ -306,7 +306,8 @@ class Api {
               'alias_of' => '',
               'description' => $description,
               'parent' => $parentCategory,
-              'slug' => ''
+              'slug' => '',
+              'name' => $name
               ]
   
           );
