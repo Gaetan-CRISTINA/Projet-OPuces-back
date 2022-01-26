@@ -35,9 +35,10 @@ class Api {
             'update-taxonomy', // name of route
             [
                 'methods' => 'put',
-                'callback' => [$this, 'createCustomTaxonomy']
+                'callback' => [$this, 'updateCustomTaxonomy']
             ]
         );
+
         register_rest_route(
             'opuces/v1', // nom de l'API
             'save-classified',
@@ -245,9 +246,11 @@ class Api {
           $name = $request->get_param('name');
           $parentCategory = $request->get_param('parentCategory');
           $description = $request->get_param('description');
+          $taxonomy = $request ->get_param('taxonomy');
+
   
           //inserting parentcategory
-          $term_id = get_term_by('name', $parentCategory, 'ProductCategory');
+          $term_id = get_term_by('name', $parentCategory, $taxonomy);
           $categoryIdParent = $term_id->term_id;
   
           $args = [
@@ -286,17 +289,19 @@ class Api {
        * Update a custom taxonomy
        */
   
-      public function updateTaxonomy(WP_REST_Request $request)
+      public function updateCustomTaxonomy(WP_REST_Request $request)
       {
           // retrieving what has been sent to the api on the endpoint /opuces/v1/update-taxonomy in POST
           $categoryId = $request->get_param('categoryId');
-          $name = $request->get_param('name');
           $parentCategory = $request->get_param('parentCategory');
           $description = $request->get_param('description');
+          $taxonomy = $request ->get_param('taxonomy');
+          $name = $request ->get_param('name');
+
   
           $updateTaxonomy = wp_update_term(
               $categoryId, 
-              $name, 
+              $taxonomy,
               [
               'alias_of' => '',
               'description' => $description,
