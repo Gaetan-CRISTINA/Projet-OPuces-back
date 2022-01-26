@@ -2,13 +2,21 @@
 
 namespace OPuces;
 
+
 class Plugin 
 { 
+    
     public function __construct()
     {
+        
+
         add_action(
             'init',
             [$this, 'createClassifiedPostType']
+        );
+        add_action(
+            'init',
+            [$this, 'createUserInfoCustomTable']
         );
         add_action(
             'init',
@@ -26,7 +34,76 @@ class Plugin
             'init',
             [$this, 'createSellerRateCustomTaxonomy']
         );
+        // add_action(
+        //     'rest_api_init',
+        //     [$this, 'opucesRegisterRestFields']
+        // );
     }
+    // https://developer.wordpress.org/reference/functions/register_rest_field/
+
+    // public function opucesRegisterRestFields(){
+ 
+    //     register_rest_field('classified',
+    //         'classifiedPrice',
+    //         array(
+    //             'get_callback'    => null,
+    //             'update_callback' => null,
+    //             'schema'          => null
+    //         )
+    //     );
+    //     register_rest_field('classified',
+    //         'classifiedBuyerId',
+    //         array(
+    //             'get_callback'    => null,
+    //             'update_callback' => null,
+    //             'schema'          => null
+    //         )
+    //     );
+          
+    // }
+
+    // public function getClassifiedBuyer($object,$field_name,$request){
+    //     $terms_result = array();
+    //     $terms =  wp_get_post_terms( $object['id'], 'ClassifiedBuyerId');
+    //     foreach ($terms as $term) {
+    //         $terms_result[$term->term_id] = array($term->name,get_term_link($term->term_id));
+    //     }
+    //     return $terms_result;
+    // }
+    // public function getClassifiedPrice($object,$field_name,$request){
+    //     $terms_result = array();
+    //     $terms =  wp_get_post_terms( $object['id'], 'classifiedPrice');
+    //     foreach ($terms as $term) {
+    //         $terms_result[$term->term_id] = array($term->name,get_term_link($term->term_id));
+    //     }
+    //     return $terms_result;
+    // }
+
+    // create additionnal custome table  userInfo
+
+    public function createUserInfoCustomTable(){
+            //Todo foreignkey
+        $sql = " CREATE TABLE user_table (
+                userID bigint(20) unsigned NOT NULL PRIMARY KEY,
+                adress1 varchar(50) ,
+                adress2 varchar(50) ,
+                zipcode int(10) NOT NULL,
+                city varchar(50) NOT NULL, 
+                country varchar(50) ,
+                latitude varchar(24) ,
+                longitude varchar(24) ,
+                phone_number bigint(16) ,
+                rate tinyint(1) ,
+                created_at datetime NOT NULL ON UPDATE CURRENT_TIMESTAMP,
+                updated_at datetime NULL
+                );
+            ";
+                // wp_users_id bigint(24),
+                // FOREIGN KEY(wp_users_id) REFERENCES wp_users(id)
+                require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+                dbDelta($sql);
+    }
+
 
     //create Classified
     public function createClassifiedPostType()
@@ -423,8 +500,54 @@ class Plugin
     public function activate()
     {
         $this->addCapAdmin(['classified']);
-          
+        $this->registerUserRole();
+        $this->registerModerateurRole();
 
+    }
+    public function registerUserRole()
+    {
+        add_role(
+            // identifiant du role 
+            'user',
+            // libellé
+            'Utilisateur',
+            // liste des autorisatrions
+            [
+                'delete_user' => false,
+                'delete_others_user' => false,
+                'delete_private_user' => false,
+                'delete_published_user' => false,
+                'edit_user' => true,
+                'edit_others_user' => false,
+                'edit_private_user' => false,
+                'edit_published_user' => true,
+                'publish_user' => false,
+                'read_private_user' => false,
+            ]
+        );
+    }
+
+    public function registerModerateurRole()
+    {
+        add_role(
+            // identifiant du role 
+            'moderator',
+            // libellé
+            'Moderateur',
+            // liste des autorisatrions
+            [
+                'delete_moderator' => false,
+                'delete_others_moderator' => false,
+                'delete_private_moderator' => false,
+                'delete_published_moderator' => false,
+                'edit_moderator' => true,
+                'edit_others_moderator' => false,
+                'edit_private_moderator' => false,
+                'edit_published_moderator' => true,
+                'publish_moderator' => false,
+                'read_private_moderator' => false,
+            ]
+        );
     }
     
     /**
@@ -443,6 +566,7 @@ class Plugin
      */
     public function addCapAdmin($customCapArray)
     {
+
         // methode qui nous permet d'ajouter les droits sur le CPT annonce pour le role administrateur
         //! Attention, sans cette opération le CPT Annonce va disparaire
         //! en effet, nous avons définis un "capability_type" pour ce dernier
