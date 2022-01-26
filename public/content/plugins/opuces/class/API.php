@@ -222,6 +222,7 @@ class Api {
         $idDelivery = $request->get_param('DeliveryMethod');
         $idState = $request->get_param('ProductState');
         $post_id = $request->get_param('post_id');
+        $classifiedBuyerId = $request->get_param('classifiedBuyerId');
         $imageId = $request->get_param('imageId');
         
         // récupération de l'utilisateur ayant envoyé la requête
@@ -276,6 +277,19 @@ class Api {
                         add_post_meta($classifiedSaveResult, $keyMeta, $price, $unique = true);
                     }
                 }
+                // si objet achete
+                if ($classifiedBuyerId > 0) 
+                {
+                    $keyMeta ='classifiedBuyerId';
+                    // test si une meta existe
+                    if (get_post_meta($classifiedSaveResult, $keyMeta, true ) ) {
+                        update_post_meta($classifiedSaveResult, $keyMeta, $classifiedBuyerId);
+                    }
+                    else {
+                        add_post_meta($classifiedSaveResult, $keyMeta, $classifiedBuyerId, $unique = true);
+                    }
+                }
+
             }
             else {
             $success = false;
