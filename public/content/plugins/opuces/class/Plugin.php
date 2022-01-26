@@ -37,7 +37,7 @@ class Plugin
         // add_action(
         //     'rest_api_init',
         //     [$this, 'opucesRegisterRestFields']
-        //);
+        // );
     }
     // https://developer.wordpress.org/reference/functions/register_rest_field/
 
@@ -46,7 +46,15 @@ class Plugin
     //     register_rest_field('classified',
     //         'classifiedPrice',
     //         array(
-    //             'get_callback'    => 'getClassifiedPrice',
+    //             'get_callback'    => null,
+    //             'update_callback' => null,
+    //             'schema'          => null
+    //         )
+    //     );
+    //     register_rest_field('classified',
+    //         'classifiedBuyerId',
+    //         array(
+    //             'get_callback'    => null,
     //             'update_callback' => null,
     //             'schema'          => null
     //         )
@@ -54,6 +62,14 @@ class Plugin
           
     // }
 
+    // public function getClassifiedBuyer($object,$field_name,$request){
+    //     $terms_result = array();
+    //     $terms =  wp_get_post_terms( $object['id'], 'ClassifiedBuyerId');
+    //     foreach ($terms as $term) {
+    //         $terms_result[$term->term_id] = array($term->name,get_term_link($term->term_id));
+    //     }
+    //     return $terms_result;
+    // }
     // public function getClassifiedPrice($object,$field_name,$request){
     //     $terms_result = array();
     //     $terms =  wp_get_post_terms( $object['id'], 'classifiedPrice');
@@ -61,8 +77,7 @@ class Plugin
     //         $terms_result[$term->term_id] = array($term->name,get_term_link($term->term_id));
     //     }
     //     return $terms_result;
-    //}
-
+    // }
 
     // create additionnal custome table  userInfo
 

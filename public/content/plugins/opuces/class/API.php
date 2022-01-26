@@ -21,10 +21,11 @@ class Api {
 
         register_rest_route(
             'opuces/v1', // nom de l'API
-            'create-classified',
+            'save-classified',
             [
                 'methods' => 'post',
-                'callback' => [$this, 'createClassified']
+                'callback' => [$this, 'saveClassified'],
+                'permission_callback' => '__return_true',
             ]
         );
 
@@ -33,7 +34,8 @@ class Api {
             'lost-password',
             [
                 'methods' => 'post',
-                'callback' => [$this, 'askNewPassword']
+                'callback' => [$this, 'askNewPassword'],
+                'permission_callback' => '__return_true',
             ]
         );
 
@@ -42,7 +44,8 @@ class Api {
             'create-new-password',
             [
                 'methods' => 'patch',
-                'callback' => [$this, 'sendLinkCreateNewPassword']
+                'callback' => [$this, 'sendLinkCreateNewPassword'],
+                'permission_callback' => '__return_true',
             ]
         );
 
@@ -51,7 +54,8 @@ class Api {
             'save-comment',
             [
                 'methods' => 'post',
-                'callback' => [$this, 'saveComment']
+                'callback' => [$this, 'saveComment'],
+                'permission_callback' => '__return_true',
             ]
         );
 
@@ -60,7 +64,8 @@ class Api {
             'upload-image',
             [
                 'methods' => 'post',
-                'callback' => [$this, 'uploadImage']
+                'callback' => [$this, 'uploadImage'],
+                'permission_callback' => '__return_true',
             ]
         );
 
@@ -69,7 +74,8 @@ class Api {
             'create-user',
             [
                 'methods' => 'post',
-                'callback' => [$this, 'createUser'] 
+                'callback' => [$this, 'createUser'] ,
+                'permission_callback' => '__return_true',
             ]
         );
 
@@ -78,7 +84,8 @@ class Api {
             'user-table',
             [
                 'methods' => 'post',
-                'callback' => [$this, 'crudUserTable'] 
+                'callback' => [$this, 'crudUserTable'] ,
+                'permission_callback' => '__return_true',
             ]
         );
         register_rest_route(
@@ -86,7 +93,8 @@ class Api {
             'user-table',
             [
                 'methods' => 'get',
-                'callback' => [$this, 'getUserTable'] 
+                'callback' => [$this, 'getUserTable'] ,
+                'permission_callback' => '__return_true',
             ]
         );
 
@@ -96,8 +104,7 @@ class Api {
        *  create & update user_table
        * $request: {"user_id","adress1","adress2","zipcode","city","country","latitude","longitude",
        * "rate", "phone_number", "crud" }
-       * crud : C ==> insert ; U ==> update
-       * return: succes = true/false
+       * return: succes = creation/modif
        * 
 	   */  
     public function crudUserTable(WP_REST_Request $request)
@@ -118,20 +125,6 @@ class Api {
 
         global $wpdb;
         
-        // if ($crud === 'I') {
-        //     $wpdb->insert('user_table', $data);
-        // } else{
-        //     if ($crud === 'U') {
-        //         $userID = $request->get_param('userID');
-        //         $where = 
-        //         [
-        //             'userID' => $userID
-        //         ];
-        //         $wpdb->update('user_table', $data, $where);
-        //     }
-        // }
-
-        // sans crud
         $userID = $request->get_param('userID');
         $table_name = 'user_table';
         // prepare <==> prepare  de pdo 
@@ -143,12 +136,14 @@ class Api {
 
             if ($user_count == 0) {
                 $wpdb->insert('user_table', $data);
+                $succes = 'insert';
             }   else{
                      $where = 
                      ['userID' => $userID];
                      $wpdb->update('user_table', $data, $where);
+                     $succes ='update';
                 }
-        return $user_count;
+        return $succes;
 
     }
         /**
@@ -208,53 +203,107 @@ class Api {
             ];
             }
      }
+      /**
+       * saveClassified
+       *  create & update post classified
+       * $request: {post_id,"content","title",author,price,[ProductCategory],[DeliveryMethod],"ProductState"
+       * return: succes = creation/modif
+       * 
+	   */  
 
-    public function createClassified(WP_REST_Request $request)
+    public function saveClassified(WP_REST_Request $request)
     {
+        $idProduct =[];
+        $idDelivery =[];
         $title = $request->get_param('title');
         $description = $request->get_param('content');
         $author = $request->get_param('author'); //! Modifier pour supprimer le user forcé et mettre wp_current_user
         $price = $request->get_param('price');
-        $type = $request->get_param('type');
-
+        $idProduct = $request->get_param('ProductCategorie');
+        $idDelivery = $request->get_param('DeliveryMethod');
+        $idState = $request->get_param('ProductState');
+        $post_id = $request->get_param('post_id');
+        $classifiedBuyerId = $request->get_param('classifiedBuyerId');
         $imageId = $request->get_param('imageId');
-
+        
         // récupération de l'utilisateur ayant envoyé la requête
+
+        // on regarde si c'est pour une creation ou une modification
+        $postStatus = get_post_status($post_id);
+        $argsPost = 
+        [
+            'ID' => $post_id,
+            'post_title' => $title,
+            'post_content' => $description,
+            'post_author'  =>  $author,
+            'post_status' => 'publish',
+            'post_type' => 'classified',
+        ];
         $user = wp_get_current_user();
-
-        $classifiedCreateResult = wp_insert_post(
-            [
-                    'post_title' => $title,
-                    'post_content' => $description,
-                    'post_author'  =>  $author,
-                    'post_status' => 'publish',
-                    'post_type' => 'classified',
-                ]
-        );
-        if (is_int($classifiedCreateResult)) {
-            if ($price > 0)
-            {
-                $keyMeta ='classifiedPrice';
-                add_post_meta($classifiedCreateResult, $keyMeta, $price ,$unique = true);
-            }
-            return [
-                    'success' => true,
-                    'title' => $title,
-                    'description' => $description,
-                    'type' => $type,
-                    'author' => $author,
-                    'price' => $price,
-                    'user' => $user,
-                    'image' => $imageId
-                    
-                ];
+        if (!$postStatus) 
+        {
+            $classifiedSaveResult = wp_insert_post
+            (
+                $argsPost
+            );
         }
-        return
-            [
-                'success' => false
-            ];
-    } 
+        else 
+        {
+            $user = wp_get_current_user();
 
+            $classifiedSaveResult = wp_update_post
+            (
+                $argsPost
+            );
+        }
+            // si pas d erreur je met a jout taxo & custum field
+            if (!is_wp_error($classifiedSaveResult)) {
+                $success = true;
+            // les 3 premiers wp_set_object servent a effacer les taxo existantes si elles existent
+                wp_set_object_terms($classifiedSaveResult, null, 'ProductCategory');
+                wp_set_object_terms($classifiedSaveResult, null, 'DeliveryMethod');
+                wp_set_object_terms($classifiedSaveResult, null, 'ProductState');
+                wp_set_object_terms($classifiedSaveResult, $idProduct, 'ProductCategory');
+                wp_set_object_terms($classifiedSaveResult, $idDelivery, 'DeliveryMethod');
+                wp_set_object_terms($classifiedSaveResult, $idState, 'ProductState');
+    
+                if ($price > 0) 
+                {
+                    $keyMeta ='classifiedPrice';
+                    // test si une meta existe
+                    if (get_post_meta($classifiedSaveResult, $keyMeta, true ) ) {
+                        update_post_meta($classifiedSaveResult, $keyMeta, $price);
+                    }
+                    else {
+                        add_post_meta($classifiedSaveResult, $keyMeta, $price, $unique = true);
+                    }
+                }
+                // si objet achete
+                if ($classifiedBuyerId > 0) 
+                {
+                    $keyMeta ='classifiedBuyerId';
+                    // test si une meta existe
+                    if (get_post_meta($classifiedSaveResult, $keyMeta, true ) ) {
+                        update_post_meta($classifiedSaveResult, $keyMeta, $classifiedBuyerId);
+                    }
+                    else {
+                        add_post_meta($classifiedSaveResult, $keyMeta, $classifiedBuyerId, $unique = true);
+                    }
+                }
+
+            }
+            else {
+            $success = false;
+            }
+
+            return 
+            [
+            'success' => $success,
+            'postid' => $classifiedSaveResult,
+            'poststatus' => $postStatus
+            ];
+    }
+  
     // demande de token pour nouveau mot de passe
     public function askNewPassword(WP_REST_Request $request)
     {
