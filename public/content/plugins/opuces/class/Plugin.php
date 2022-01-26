@@ -114,7 +114,7 @@ class Plugin
                 'label' => 'Annonce',
                 'public' => true,
                 'hierarchical' => false,
-                'menu_icon' => 'dashicons-admin-page', //icone visible dans la dashboard
+                'menu_icon' => 'dashicons-welcome-widgets-menus', //icone visible dans la dashboard
                 'supports' => [
                     'title',
                     'thumbnail',
@@ -145,7 +145,7 @@ class Plugin
         );
         //on crée les états possibles d'un produit qui seront intégrés dans WP
         $addTaxos = [
-            'Jamais utilisé',
+            'jamais utilisé',
             'peu utilisé',
             'usé',
             'tres usé'
@@ -218,7 +218,7 @@ class Plugin
             'Livres',
             'Vacances',
             'Immobilier',
-            'Vêtement',
+            'Mode',
             'High Tech',
             'Service à la personne'
         ];
@@ -389,18 +389,18 @@ class Plugin
                 }
 
             }
-            if($term === 'Vêtement')
+            if($term === 'Mode')
             {
                 $addSousTaxos = [
-                    'Tee-shirt',
-                    'Pull',
-                    'Robe',
-                    'Jupe',
-                    'Echarpe',
-                    'Pantalon'
+                    'Vêtements Femmes',
+                    'Vêtements Hommes',
+                    'Vêtements Enfants',
+                    'Bébé',
+                    'Chaussures',
+                    'Accessoires'
                 ];
 
-                $term_id = get_term_by('name','Vêtement','ProductCategory');
+                $term_id = get_term_by('name','Mode','ProductCategory');
                 $categoryIdParent = $term_id->term_id;
 
                 $args = [
@@ -486,10 +486,15 @@ class Plugin
         }
     }
 
+    public function createCustomTaxonomy ()
+    {
+        
+    }
+
 
     /**
      * Activation Plugin
-     * add capabilities to Administrator
+     * Add capabilities to Administrator
      * 
      */
     public function activate()
@@ -546,7 +551,7 @@ class Plugin
     }
     
     /**
-     * Method to desactivate Plugin
+     * Method to deactivate Plugin
      * 
      */
     public function deactivate()
@@ -554,9 +559,18 @@ class Plugin
 
     }
 
+
+    /**
+     * Method that allows us to add the rights on the CPT (Custom Post Type) classified for the administrator role
+     * 
+     */
     public function addCapAdmin($customCapArray)
     {
-        // methode qui nous permet d'ajouter les droits sur le CPT classified pour le role administrateur
+
+        // methode qui nous permet d'ajouter les droits sur le CPT annonce pour le role administrateur
+        //! Attention, sans cette opération le CPT Annonce va disparaire
+        //! en effet, nous avons définis un "capability_type" pour ce dernier
+        //! et l'adminstrateur ne vas pas avoir automatiquement les droits 
 
         $role = get_role('administrator');
         foreach ($customCapArray as $customCap) {
