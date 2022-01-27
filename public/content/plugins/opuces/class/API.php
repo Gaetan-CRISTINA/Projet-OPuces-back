@@ -28,7 +28,7 @@ class Api {
                 'callback' => [$this, 'createCustomTaxonomy']
             ]
         );
-
+        register_rest_route(
             'opuces/v1', // nom de l'API
             'save-classified',
             [
@@ -233,7 +233,7 @@ class Api {
         $description = $request->get_param('description');
 
         //adding parentcategory
-        $term_id = get_term_by('name',$parentCategory, 'ProductCategory');
+        $term_id = get_term_by('name', $parentCategory, 'ProductCategory');
         $categoryIdParent = $term_id->term_id;
 
         $args = [
@@ -242,17 +242,16 @@ class Api {
             'parent' => $categoryIdParent
         ];
         //inserting the new custom taxonomy in database
-        $createCustomTaxonomyResult = wp_insert_term( 
-            $name, 
+        $createCustomTaxonomyResult = wp_insert_term(
+            $name,
             $idcategory,
             $args
         );
 
         //verification if taxonomy already exist
-        if(is_int($createCustomTaxonomyResult)){
-
+        if (is_int($createCustomTaxonomyResult)) {
         };
-        
+    } 
 
 
     public function saveClassified(WP_REST_Request $request)
