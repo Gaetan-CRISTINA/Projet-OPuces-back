@@ -128,6 +128,10 @@ class Plugin
                 'show_in_rest' => true //rendre accessible avec API Wordpress
             ]
         ); 
+        // creation des custum fiels attaches a classified classifiedPrice
+        add_post_meta(1 , "classifiedBuyerId" , 1 , $unique = true);
+        add_post_meta(1 , "classifiedPrice" , 1 , $unique = true);
+
     }
        
     // taxonomie pour l'état du produit à la vente
@@ -486,11 +490,6 @@ class Plugin
         }
     }
 
-    public function createCustomTaxonomy ()
-    {
-        
-    }
-
 
     /**
      * Activation Plugin
@@ -502,7 +501,7 @@ class Plugin
         $this->addCapAdmin(['classified']);
         $this->registerUserRole();
         $this->registerModerateurRole();
-
+        $this->registerPostStatus();
     }
     public function registerUserRole()
     {
@@ -549,14 +548,47 @@ class Plugin
             ]
         );
     }
-    
+    public function registerPostStatus()
+    {
+        register_post_status(
+            // identifiant du status 
+            'notValidate',
+            [
+            'label' => 'A validé',
+            'exclude_from_search' => true,
+            'public' => false,
+            'publicly_queryable' => false,
+            'show_in_admin_status_list' => true,
+            'show_in_admin_all_list' => true,
+            'label_count'=> _n_noop( 'A valider <span class="count">(%s)</span>', 'A validé <span class="count">(%s)</span>' ),
+            ]
+        );
+    }  
     /**
      * Method to deactivate Plugin
      * 
      */
     public function deactivate()
     {
+        // purge des taxo
+        $arrayTaxos = [ "ProductState","SellerRate","ProductCategory","DeliveryMethod"];
 
+        foreach ($arrayTaxos as $taxo) 
+        {
+            $term_args = array(
+                'taxonomy' => $taxo,
+                'hide_empty' => false,                
+                'orderby' => 'name',                
+                'order' => 'ASC'                
+                );
+                
+            $terms = get_terms($term_args);
+
+            foreach ($terms as $term) 
+            {
+                wp_delete_term($term->term_id, $taxo);
+            }
+        }
     }
 
 
@@ -564,6 +596,7 @@ class Plugin
      * Method that allows us to add the rights on the CPT (Custom Post Type) classified for the administrator role
      * 
      */
+
     public function addCapAdmin($customCapArray)
     {
 
