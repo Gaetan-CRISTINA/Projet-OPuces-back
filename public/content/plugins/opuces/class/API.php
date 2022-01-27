@@ -30,6 +30,16 @@ class Api {
             ]
         );
         register_rest_route(
+
+            'opuces/v1', // API Name
+            'taxonomy', // name of route
+            [
+                'methods' => 'get',
+                'callback' => [$this, 'getCustomTaxonomy'],
+                'permission_callback' => '__return_true',
+            ]
+        );
+        register_rest_route(
             'opuces/v1', // nom de l'API
             'save-classified',
             [
@@ -214,41 +224,29 @@ class Api {
             ];
         }
     }
-  /**
-       * createCustomTaxonomy
-       *  create & update post classified
-       * $request: {icategory,"name","parentCategory","description"
-       * return: succes = creation/modif
+        /**
+       * getCustomTaxonomy
+       *  read Taxo
+       * $request: {"nomtaxo", idparent"}
+       * si idparent = 0 toutes les categories sinon les sous categories de idparent
+       * return: {["nomtaxo",idparent, "name"]}
        * 
 	   */  
-    public function createCustomTaxonomy(WP_REST_Request $request)
+    public function getCustomTaxonomy(WP_REST_Request $request)
     {
-        // retrieving what has been sent to the api on the endpoint /opuces/v1/create-custom-taxonomy in POST
-        $idcategory = $request->get_param('idcategory');
-        $name = $request->get_param('name');
-        $parentCategory = $request->get_param('parentCategory');
-        $description = $request->get_param('description');
-
-        //adding parentcategory
-        $term_id = get_term_by('name', $parentCategory, 'ProductCategory');
-        $categoryIdParent = $term_id->term_id;
-
-        $args = [
-            'description' => $description,
-            'slug' => '',
-            'parent' => $categoryIdParent
-        ];
-        //inserting the new custom taxonomy in database
-        $createCustomTaxonomyResult = wp_insert_term(
-            $name,
-            $idcategory,
-            $args
-        );
-        if (!is_wp_error($createCustomTaxonomyResult)) {
-            $success = true;
+        // retrieving what has been sent to the api on the endpoint /opuces/v1/taxonomy in get
+        $taxonomy = $request->get_param('taxonomy');
+        $idParent = $request->get_param('idParent');
+        $termChildren = get_terms( $taxonomy, 
+        [
+            'hide_empty' => 0,
+            'parent' => $idParent
+        ]);
+        if (!is_wp_error($termChildren)) {
+            $success = $termChildren ;
         }
         else {
-        $success = false;
+        $success = $termChildren;
         }
 
         return 
@@ -256,6 +254,48 @@ class Api {
         'success' => $success,
         ];
     }
+    /**
+       * createCustomTaxonomy
+       *  create & update post classified
+       * $request: {icategory,"name","parentCategory","description"
+       * return: succes = creation/modif
+       * 
+	   */  
+      public function createCustomTaxonomy(WP_REST_Request $request)
+      {
+          // retrieving what has been sent to the api on the endpoint /opuces/v1/create-custom-taxonomy in POST
+          $idcategory = $request->get_param('idcategory');
+          $name = $request->get_param('name');
+          $parentCategory = $request->get_param('parentCategory');
+          $description = $request->get_param('description');
+  
+          //adding parentcategory
+          $term_id = get_term_by('name', $parentCategory, 'ProductCategory');
+          $categoryIdParent = $term_id->term_id;
+  
+          $args = [
+              'description' => $description,
+              'slug' => '',
+              'parent' => $categoryIdParent
+          ];
+          //inserting the new custom taxonomy in database
+          $createCustomTaxonomyResult = wp_insert_term(
+              $name,
+              $idcategory,
+              $args
+          );
+          if (!is_wp_error($createCustomTaxonomyResult)) {
+              $success = true;
+          }
+          else {
+          $success = false;
+          }
+  
+          return 
+          [
+          'success' => $success,
+          ];
+      }
       /**
        * saveClassified
        *  create & update post classified
