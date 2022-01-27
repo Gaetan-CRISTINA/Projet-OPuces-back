@@ -25,10 +25,11 @@ class Api {
             'create-custom-taxonomy', // name of route
             [
                 'methods' => 'post',
-                'callback' => [$this, 'createCustomTaxonomy']
+                'callback' => [$this, 'createCustomTaxonomy'],
+                'permission_callback' => '__return_true',
             ]
         );
-
+        register_rest_route(
             'opuces/v1', // nom de l'API
             'save-classified',
             [
@@ -213,16 +214,6 @@ class Api {
             ];
             }
      }
-      /**
-       * saveClassified
-       *  create & update post classified
-       * $request: {post_id,"content","title",author,price,[ProductCategory],[DeliveryMethod],"ProductState"
-       * return: succes = creation/modif
-       * 
-	   */  
-
-
-
 
     public function createCustomTaxonomy(WP_REST_Request $request)
     {
@@ -233,7 +224,7 @@ class Api {
         $description = $request->get_param('description');
 
         //adding parentcategory
-        $term_id = get_term_by('name',$parentCategory, 'ProductCategory');
+        $term_id = get_term_by('name', $parentCategory, 'ProductCategory');
         $categoryIdParent = $term_id->term_id;
 
         $args = [
@@ -242,21 +233,22 @@ class Api {
             'parent' => $categoryIdParent
         ];
         //inserting the new custom taxonomy in database
-        $createCustomTaxonomyResult = wp_insert_term( 
-            $name, 
+        $createCustomTaxonomyResult = wp_insert_term(
+            $name,
             $idcategory,
             $args
         );
-
-        //verification if taxonomy already exist
-        if(is_int($createCustomTaxonomyResult)){
-
-        };
-        
-
-
+    }
+          /**
+       * saveClassified
+       *  create & update post classified
+       * $request: {post_id,"content","title",author,price,[ProductCategory],[DeliveryMethod],"ProductState"
+       * return: succes = creation/modif
+       * 
+	   */ 
     public function saveClassified(WP_REST_Request $request)
     {
+   
         $idProduct =[];
         $idDelivery =[];
         $title = $request->get_param('title');
@@ -280,8 +272,8 @@ class Api {
             'post_title' => $title,
             'post_content' => $description,
             'post_author'  =>  $author,
-            'post_status' => 'publish',
             'post_type' => 'classified',
+            'post_status' => 'publish',
         ];
         $user = wp_get_current_user();
         if (!$postStatus) 
@@ -290,7 +282,9 @@ class Api {
             (
                 $argsPost
             );
+
         }
+        
         else 
         {
             $user = wp_get_current_user();
