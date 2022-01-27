@@ -579,24 +579,24 @@ class Plugin
         $arrayTaxos = [ "ProductState","SellerRate","ProductCategory","DeliveryMethod"];
 
 
-        foreach ($arrayTaxos as $taxo) 
-            {
+        foreach ($arrayTaxos as $taxo) {
             $term_args = array(
             'taxonomy' => $taxo,
-            'hide_empty' => false,                
-            'orderby' => 'name',                
-            'order' => 'ASC' 
-             }
+            'hide_empty' => false,
+            'orderby' => 'name',
+            'order' => 'ASC'
+             
         );
         
-    $terms = get_terms($term_args);
+            $terms = get_terms($term_args);
 
-    foreach ($terms as $term) 
-    {
-        wp_delete_term($term->term_id, $taxo);
+            foreach ($terms as $term) {
+                wp_delete_term($term->term_id, $taxo);
+            }
+        }
     }
 
-    }
+    
 
 
     /**
