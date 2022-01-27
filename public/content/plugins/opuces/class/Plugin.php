@@ -128,9 +128,10 @@ class Plugin
                 'show_in_rest' => true //rendre accessible avec API Wordpress
             ]
         ); 
-        // creation des custum fiels attaches a classified classifiedPrice
-        add_post_meta(1 , "classifiedBuyerId" , 1 , $unique = true);
-        add_post_meta(1 , "classifiedPrice" , 1 , $unique = true);
+
+                // creation des custum fields attaches a classified classifiedPrice
+                add_post_meta(1 , "classifiedBuyerId" , 1 , $unique = true);
+                add_post_meta(1 , "classifiedPrice" , 1 , $unique = true);
 
     }
        
@@ -548,6 +549,7 @@ class Plugin
             ]
         );
     }
+
     public function registerPostStatus()
     {
         register_post_status(
@@ -563,7 +565,10 @@ class Plugin
             'label_count'=> _n_noop( 'A valider <span class="count">(%s)</span>', 'A validé <span class="count">(%s)</span>' ),
             ]
         );
-    }  
+
+    }
+
+
     /**
      * Method to deactivate Plugin
      * 
@@ -573,22 +578,24 @@ class Plugin
         // purge des taxo
         $arrayTaxos = [ "ProductState","SellerRate","ProductCategory","DeliveryMethod"];
 
-        foreach ($arrayTaxos as $taxo) 
-        {
-            $term_args = array(
-                'taxonomy' => $taxo,
-                'hide_empty' => false,                
-                'orderby' => 'name',                
-                'order' => 'ASC'                
-                );
-                
-            $terms = get_terms($term_args);
 
-            foreach ($terms as $term) 
+        foreach ($arrayTaxos as $taxo) 
             {
-                wp_delete_term($term->term_id, $taxo);
-            }
-        }
+            $term_args = array(
+            'taxonomy' => $taxo,
+            'hide_empty' => false,                
+            'orderby' => 'name',                
+            'order' => 'ASC' 
+             }
+        );
+        
+    $terms = get_terms($term_args);
+
+    foreach ($terms as $term) 
+    {
+        wp_delete_term($term->term_id, $taxo);
+    }
+
     }
 
 
