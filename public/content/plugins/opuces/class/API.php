@@ -39,10 +39,6 @@ class Api {
                 'callback' => [$this, 'updateCustomTaxonomy']
             ]
         );
-<<<<<<< HEAD
-=======
-
->>>>>>> 226ad2c78cf2ad5c9d6d36c62ff411a3d1eab994
         register_rest_route(
             'opuces/v1', // nom de l'API
             'save-classified',
