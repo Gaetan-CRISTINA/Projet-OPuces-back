@@ -50,6 +50,16 @@ class Api {
                     'permission_callback' => '__return_true',
                 ]
                 );
+                register_rest_route(
+
+                    'opuces/v1', // API Name
+                    'classifiedValided', // name of route
+                    [
+                        'methods' => 'put',
+                        'callback' => [$this, 'putClassifiedValided'],
+                        'permission_callback' => '__return_true',
+                    ]
+                    );
         register_rest_route(
 
             'opuces/v1', // API Name
@@ -279,9 +289,8 @@ class Api {
             /**
        * getCustomTaxonomy
        *  read Taxo
-       * $request: {"nomtaxo", idparent"}
-       * si idparent = 0 toutes les categories sinon les sous categories de idparent
-       * return: {["nomtaxo",idparent, "name"]}
+       * $request: 
+       * return: {["posts]}
        * 
 	   */  
       public function getClassifiedAtValidate(WP_REST_Request $request)
@@ -294,7 +303,35 @@ class Api {
         ];
         $postsAtValidate = new WP_Query( $args );
         
-        return [$postsAtValidate];
+        return [$postsAtValidate->posts];
+          
+      }
+       /**
+       * getCustomTaxonomy
+       *  read Taxo
+       * $request: {post_id, "$newStatus= "publish","trash","noValided"}
+       * return: id/0
+       * 
+	   */  
+      public function putClassifiedValided(WP_REST_Request $request)
+      {
+        $post_id = $request->get_param('post_id');
+        $newStatus = $request->get_param('newStatus');
+
+        $argsPost = 
+            [
+                'post_status' => $newStatus,
+                'post_type' => 'classified',
+                'ID' => $post_id
+            ];
+
+        $statusChangeResult = wp_update_post
+            (
+                $argsPost,
+            );
+
+        
+        return [$statusChangeResult];
           
       }
     /**
@@ -304,8 +341,6 @@ class Api {
        * return: succes = creation/modif
        * 
 	   */  
-      
-  
       public function createCustomTaxonomy(WP_REST_Request $request)
       {
           // retrieving what has been sent to the api on the endpoint /opuces/v1/create-custom-taxonomy in POST
