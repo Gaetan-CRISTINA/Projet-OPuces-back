@@ -4,6 +4,7 @@ namespace OPuces;
 
 use WP_REST_Request;
 use WP_USER;
+use WP_Query;
 
 class Api {
 
@@ -39,6 +40,16 @@ class Api {
                 'permission_callback' => '__return_true',
             ]
             );
+            register_rest_route(
+
+                'opuces/v1', // API Name
+                'classifiedAtValidate', // name of route
+                [
+                    'methods' => 'get',
+                    'callback' => [$this, 'getClassifiedAtValidate'],
+                    'permission_callback' => '__return_true',
+                ]
+                );
         register_rest_route(
 
             'opuces/v1', // API Name
@@ -265,34 +276,36 @@ class Api {
         'success' => $success,
         ];
     }
+            /**
+       * getCustomTaxonomy
+       *  read Taxo
+       * $request: {"nomtaxo", idparent"}
+       * si idparent = 0 toutes les categories sinon les sous categories de idparent
+       * return: {["nomtaxo",idparent, "name"]}
+       * 
+	   */  
+      public function getClassifiedAtValidate(WP_REST_Request $request)
+      {
+        $args = 
+        [ 
+            'post_status' => ['notValided'],
+            'post_type'   => 'classified',
+
+        ];
+        $postsAtValidate = new WP_Query( $args );
+        
+        return [$postsAtValidate];
+          
+      }
     /**
        * createCustomTaxonomy
        *  create & update post classified
-       * $request: {icategory,"name","parentCategory","description"
+       * $request: {categoryId,"name","parentCategory","description","taxonomy"
        * return: succes = creation/modif
        * 
 	   */  
       
-
-            
-     
-
-
-      /**
-       * saveClassified
-       *  create & update post classified
-       * $request: {post_id,"content","title",author,price,[ProductCategory],[DeliveryMethod],"ProductState"
-       * return: succes = creation/modif
-       * 
-	   */  
-
-      /** 
-       * Custom Taxonomy
-       * create new custom taxonomy
-       * 
-	   */
-
-
+  
       public function createCustomTaxonomy(WP_REST_Request $request)
       {
           // retrieving what has been sent to the api on the endpoint /opuces/v1/create-custom-taxonomy in POST
@@ -402,7 +415,7 @@ class Api {
         $post_id = $request->get_param('post_id');
         $classifiedBuyerId = $request->get_param('classifiedBuyerId');
         $imageId = $request->get_param('imageId');
-        
+
         // récupération de l'utilisateur ayant envoyé la requête
 
         // on regarde si c'est pour une creation ou une modification
@@ -414,11 +427,12 @@ class Api {
             'post_content' => $description,
             'post_author'  =>  $author,
             'post_type' => 'classified',
-            'post_status' => 'publish',
         ];
         $user = wp_get_current_user();
         if (!$postStatus) 
         {
+            $argsPost['post_status'] = 'notValided';
+
             $classifiedSaveResult = wp_insert_post
             (
                 $argsPost
