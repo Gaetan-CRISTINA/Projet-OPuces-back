@@ -291,7 +291,7 @@ class Api {
   
       public function updateCustomTaxonomy(WP_REST_Request $request)
       {
-          // retrieving what has been sent to the api on the endpoint /opuces/v1/update-taxonomy in POST
+          // retrieving what has been sent to the api on the endpoint /opuces/v1/update-taxonomy in PUT
           $categoryId = $request->get_param('categoryId');
           $parentCategory = $request->get_param('parentCategory');
           $description = $request->get_param('description');
