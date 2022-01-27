@@ -29,6 +29,17 @@ class Api {
                 'permission_callback' => '__return_true',
             ]
         );
+
+        register_rest_route(
+
+            'opuces/v1', // API Name
+            'update-taxonomy', // name of route
+            [
+                'methods' => 'put',
+                'callback' => [$this, 'updateCustomTaxonomy']
+            ]
+        );
+
         register_rest_route(
             'opuces/v1', // nom de l'API
             'save-classified',
@@ -215,6 +226,110 @@ class Api {
             }
      }
 
+      /**
+       * saveClassified
+       *  create & update post classified
+       * $request: {post_id,"content","title",author,price,[ProductCategory],[DeliveryMethod],"ProductState"
+       * return: succes = creation/modif
+       * 
+	   */  
+
+      /** 
+       * Custom Taxonomy
+       * create new custom taxonomy
+       * 
+	   */
+
+
+      public function createCustomTaxonomy(WP_REST_Request $request)
+      {
+          // retrieving what has been sent to the api on the endpoint /opuces/v1/create-custom-taxonomy in POST
+          $categoryId = $request->get_param('categoryId');
+          $name = $request->get_param('name');
+          $parentCategory = $request->get_param('parentCategory');
+          $description = $request->get_param('description');
+          $taxonomy = $request ->get_param('taxonomy');
+
+  
+          //inserting parentcategory
+          $term_id = get_term_by('name', $parentCategory, $taxonomy);
+          $categoryIdParent = $term_id->term_id;
+  
+          $args = [
+              'description' => $description,
+              'slug' => '',
+              'parent' => $categoryIdParent
+          ];
+          //creating a new custom taxonomy
+          $createCustomTaxonomyResult = wp_insert_term(
+              $name,
+              $categoryId,
+              $args
+          );
+  
+          //verification if custom taxonomy has been created
+          if (is_int($createCustomTaxonomyResult)) {
+              return [
+                  'success' => true,
+              ];
+          }
+          if (is_wp_error($createCustomTaxonomyResult)) {
+              return [
+                  'success' => false,
+                  'error' => $createCustomTaxonomyResult
+                  ];
+          } else {
+              return [
+                  'success' => true              
+              ];
+          };
+  
+  
+      } //<-- end of public function createCustomTaxonomy
+  
+      /**
+       * Update a custom taxonomy
+       */
+  
+      public function updateCustomTaxonomy(WP_REST_Request $request)
+      {
+          // retrieving what has been sent to the api on the endpoint /opuces/v1/update-taxonomy in PUT
+          $categoryId = $request->get_param('categoryId');
+          $parentCategory = $request->get_param('parentCategory');
+          $description = $request->get_param('description');
+          $taxonomy = $request ->get_param('taxonomy');
+          $name = $request ->get_param('name');
+
+  
+          $updateTaxonomy = wp_update_term(
+              $categoryId, 
+              $taxonomy,
+              [
+              'alias_of' => '',
+              'description' => $description,
+              'parent' => $parentCategory,
+              'slug' => '',
+              'name' => $name
+              ]
+  
+          );
+  
+          if ( ! is_wp_error($updateTaxonomy))
+          {
+              echo 'Success!';
+          } else {
+              return [
+              'success' => false,
+              'error' => $updateTaxonomy
+              ];
+          };
+      
+      } // <-- end of public function updateTaxonomy
+        
+
+
+
+
     public function createCustomTaxonomy(WP_REST_Request $request)
     {
         // retrieving what has been sent to the api on the endpoint /opuces/v1/create-custom-taxonomy in POST
@@ -246,6 +361,7 @@ class Api {
        * return: succes = creation/modif
        * 
 	   */ 
+
     public function saveClassified(WP_REST_Request $request)
     {
    
