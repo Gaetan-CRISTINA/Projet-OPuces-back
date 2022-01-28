@@ -272,7 +272,8 @@ class Api {
         $termChildren = get_terms( $taxonomy, 
         [
             'hide_empty' => 0,
-            'parent' => $idParent
+            'parent' => $idParent,
+            'number' => 99
         ]);
         if (!is_wp_error($termChildren)) {
             $success = $termChildren ;
@@ -301,9 +302,20 @@ class Api {
             'post_type'   => 'classified',
 
         ];
-        $postsAtValidate = new WP_Query( $args );
-        
-        return [$postsAtValidate->posts];
+         $posts=[];
+         $postsAtValidate = new WP_Query( $args );
+         $posts = $postsAtValidate->posts;
+         foreach ($posts as $post){
+            $id = $post->ID;
+            $terms = get_the_terms($id, "ProductCategory" );
+                foreach ($terms as $term) 
+                {
+                $post['post_ProductCategory'] = $term;
+                }
+            }
+
+
+        return [$postsAtValidate];
           
       }
        /**
