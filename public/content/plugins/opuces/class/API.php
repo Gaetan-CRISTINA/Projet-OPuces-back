@@ -40,25 +40,25 @@ class Api {
                 'permission_callback' => '__return_true',
             ]
             );
-            register_rest_route(
+        register_rest_route(
 
-                'opuces/v1', // API Name
-                'classifiedAtValidate', // name of route
-                [
-                    'methods' => 'get',
-                    'callback' => [$this, 'getClassifiedAtValidate'],
-                    'permission_callback' => '__return_true',
-                ]
-                );
-                register_rest_route(
+            'opuces/v1', // API Name
+            'classifiedAtValidate', // name of route
+            [
+                'methods' => 'get',
+                'callback' => [$this, 'getClassifiedAtValidate'],
+                'permission_callback' => '__return_true',
+            ]
+            );
+        register_rest_route(
 
-                    'opuces/v1', // API Name
-                    'classifiedValided', // name of route
-                    [
-                        'methods' => 'put',
-                        'callback' => [$this, 'putClassifiedValided'],
-                        'permission_callback' => '__return_true',
-                    ]
+            'opuces/v1', // API Name
+            'classifiedValided', // name of route
+            [
+                'methods' => 'put',
+                'callback' => [$this, 'putClassifiedValided'],
+                'permission_callback' => '__return_true',
+            ]
                     );
         register_rest_route(
 
@@ -484,7 +484,7 @@ class Api {
                 $argsPost
             );
         }
-            // si pas d erreur je met a jout taxo & custum field
+            // si pas d erreur je met a jour taxo & custum field
             if (!is_wp_error($classifiedSaveResult)) {
                 $success = true;
             // les 3 premiers wp_set_object servent a effacer les taxo existantes si elles existent
@@ -494,6 +494,25 @@ class Api {
                 wp_set_object_terms($classifiedSaveResult, $idProduct, 'ProductCategory');
                 wp_set_object_terms($classifiedSaveResult, $idDelivery, 'DeliveryMethod');
                 wp_set_object_terms($classifiedSaveResult, $idState, 'ProductState');
+
+                // recuperation des parents d une categorie
+                $terms = get_the_terms( $classifiedSaveResult, 'ProductCategory' );
+                $categorieparent_id = [];
+                // pour chaque term récupéré 
+                foreach ( $terms as $term ) { // pour chaque term récupéré
+                        // s'il n'a pas de parent
+                        if ($term->parent == 0){
+                            // et bien on le tient, c'est le parent
+                            $categorieparent_id[] = $term->term_id; 
+                        // sinon
+                        } else {
+                            // on va chercher ses parents
+                            $categorieparent_id[] = $term->parent;
+                    }
+                }
+                // puis on prend le premier terme trouvé
+                    $term_categorieparent_id = $categorieparent_id[0];
+                    wp_set_object_terms($classifiedSaveResult, $term_categorieparent_id , 'ProductCategory');
     
                 if ($price > 0) 
                 {
@@ -528,8 +547,7 @@ class Api {
             [
             'success' => $success,
             'postid' => $classifiedSaveResult,
-            'poststatus' => $postStatus
-            ];
+             ];
     }
   
     // demande de token pour nouveau mot de passe
