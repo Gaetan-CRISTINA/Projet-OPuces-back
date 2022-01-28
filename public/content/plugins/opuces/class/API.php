@@ -300,22 +300,26 @@ class Api {
         [ 
             'post_status' => ['notValided'],
             'post_type'   => 'classified',
-
+            // 'meta_key' => "classifiedPrice"
         ];
-         $posts=[];
+         $arrayPostTaxo=[];
+         $terms=[];
          $postsAtValidate = new WP_Query( $args );
          $posts = $postsAtValidate->posts;
-         foreach ($posts as $post){
+         foreach ($posts as $post)
+         {
             $id = $post->ID;
-            $terms = get_the_terms($id, "ProductCategory" );
+            $terms = wp_get_object_terms($id, "ProductCategory" );
+
                 foreach ($terms as $term) 
                 {
-                $post['post_ProductCategory'] = $term;
+                $arrayPostTaxo['post_id'][$id] = $term->name; ;
                 }
-            }
+                // return [$term];
+         }
 
 
-        return [$postsAtValidate];
+        return [$postsAtValidate->posts, $arrayPostTaxo];
           
       }
        /**
