@@ -269,17 +269,18 @@ class Api {
         // retrieving what has been sent to the api on the endpoint /opuces/v1/taxonomy in get
         $taxonomy = $request->get_param('taxonomy');
         $idParent = $request->get_param('idParent');
-        $termChildren = get_terms( $taxonomy, 
+        $termChildren = get_terms(  
         [
+            'taxonomy' => $taxonomy,
             'hide_empty' => 0,
-            'parent' => $idParent,
-            'number' => 99
-        ]);
+            'parent' => $idParent
+          ]);
+        
         if (!is_wp_error($termChildren)) {
             $success = $termChildren ;
         }
         else {
-        $success = $termChildren;
+        $success = false;
         }
 
         return 
@@ -540,6 +541,13 @@ class Api {
                     else {
                         add_post_meta($classifiedSaveResult, $keyMeta, $price, $unique = true);
                     }
+                }
+                // je met a jour l'image
+                if($imageId) {
+                    set_post_thumbnail(
+                        $classifiedSaveResult,
+                        $imageId
+                    );
                 }
                 // si objet achete
                 if ($classifiedBuyerId > 0) 

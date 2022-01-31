@@ -99,6 +99,21 @@ class Plugin
             'label_count'=> _n_noop('A valider <span class="count">(%s)</span>', 'A validé <span class="count">(%s)</span>'),
             ]
         );
+        register_post_status(
+
+             // identifiant du status
+             'vendu',
+             [
+             'label' => 'vendu',
+             'exclude_from_search' => true,
+             'public' => false,
+             'publicly_queryable' => false,
+             'show_in_admin_status_list' => true,
+             'show_in_admin_all_list' => true,
+             'label_count'=> _n_noop('A valider <span class="count">(%s)</span>', 'A validé <span class="count">(%s)</span>'),
+             ]
+            );
+
     }
 
     // create additionnal custome table  userInfo
