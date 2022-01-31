@@ -373,7 +373,7 @@ class Api
         $idProduct = [];
         $idDelivery = [];
         $title = $request->get_param('title');
-        $description = $request->get_param('content');
+        $description = $request->get_param('description');
         $user = get_current_user_id();
         $price = $request->get_param('price');
         $idProduct = $request->get_param('ProductCategorie');
@@ -381,6 +381,7 @@ class Api
         $idState = $request->get_param('ProductState');
         $post_id = $request->get_param('post_id');
         $classifiedBuyerId = $request->get_param('classifiedBuyerId');
+        $content = $request->get_param('content');
         $imageId = $request->get_param('imageId');
 
         // récupération de l'utilisateur ayant envoyé la requête
@@ -392,10 +393,11 @@ class Api
             [
                 'ID' => $post_id,
                 'post_title' => $title,
-                'post_content' => $description,
-                'post_author'  => $user,
+                'post_excerpt' => $description,
                 'post_type' => 'classified',
                 'post_status' => 'publish',
+                'post_content' => $content,
+            
             ];
         
         if (!$postStatus) {
@@ -444,9 +446,17 @@ class Api
         return
             [
                 'success' => $success,
-                'postid' => $classifiedSaveResult,
-                'poststatus' => $postStatus,
-                'auteur' => $user
+                'post_id' => $classifiedSaveResult,
+                'post_status' => $postStatus,
+                'title' => $title,
+                'auteur' => $user,
+                'description' => $description,
+                'content' => $content,
+                'price' => $price,
+                'ProductCategory' => $idProduct,
+                'DeliveryMethod' => $idDelivery,
+                'ProductState' => $idState,
+                'classifiedBuyerId' => $classifiedBuyerId
             ];
     }
 
