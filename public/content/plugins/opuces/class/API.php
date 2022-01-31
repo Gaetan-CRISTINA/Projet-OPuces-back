@@ -374,7 +374,7 @@ class Api
         $idDelivery = [];
         $title = $request->get_param('title');
         $description = $request->get_param('content');
-        
+        $user = get_current_user_id();
         $price = $request->get_param('price');
         $idProduct = $request->get_param('ProductCategorie');
         $idDelivery = $request->get_param('DeliveryMethod');
@@ -387,8 +387,6 @@ class Api
 
         // on regarde si c'est pour une creation ou une modification
         $postStatus = get_post_status($post_id);
-        $user = wp_get_current_user()->data->ID;
-        // $userInt = intval($user);
         
         $argsPost =
             [
@@ -405,9 +403,7 @@ class Api
                 $argsPost
             );
         } else {
-            $user = wp_get_current_user();
-
-            $classifiedSaveResult = wp_update_post(
+                $classifiedSaveResult = wp_update_post(
                 $argsPost
             );
         }
