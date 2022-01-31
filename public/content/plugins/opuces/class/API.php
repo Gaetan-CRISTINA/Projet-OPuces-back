@@ -487,48 +487,8 @@ class Api
           };
   
   
-      } //<-- end of public function createCustomTaxonomy
-  
-      /**
-       * Update a custom taxonomy
-       */
-  
-      public function updateCustomTaxonomy(WP_REST_Request $request)
-      {
-          // retrieving what has been sent to the api on the endpoint /opuces/v1/update-taxonomy in PUT
-          $categoryId = $request->get_param('categoryId');
-          $parentCategory = $request->get_param('parentCategory');
-          $description = $request->get_param('description');
-          $taxonomy = $request ->get_param('taxonomy');
-          $name = $request ->get_param('name');
-
-  
-          $updateTaxonomy = wp_update_term(
-              $categoryId, 
-              $taxonomy,
-              [
-              'alias_of' => '',
-              'description' => $description,
-              'parent' => $parentCategory,
-              'slug' => '',
-              'name' => $name
-              ]
-  
-          );
-  
-          if ( ! is_wp_error($updateTaxonomy))
-          {
-              echo 'Success!';
-          } else {
-              return [
-              'success' => false,
-              'error' => $updateTaxonomy
-              ];
-          };
+      //<-- end of public function createCustomTaxonomy
       
-      } // <-- end of public function updateTaxonomy
-        
-    
           /**
        * saveClassified
        *  create & update post classified
@@ -731,11 +691,10 @@ class Api
                     }
 
                 }
-            }
-        } else {
-            $success = false;
-        }
-
+            
+             } else {
+                 $success = false;
+             }
         return
             [
                 'success' => $success,
@@ -751,8 +710,9 @@ class Api
                 'ProductState' => $idState,
                 'classifiedBuyerId' => $classifiedBuyerId
             ];
-
-    }
+        
+        }
+    
 
     // demande de token pour nouveau mot de passe
     public function askNewPassword(WP_REST_Request $request)
