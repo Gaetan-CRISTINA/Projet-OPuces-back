@@ -4,6 +4,7 @@ namespace OPuces;
 
 use WP_REST_Request;
 use WP_USER;
+use WP_Query;
 
 class Api
 {
@@ -40,6 +41,26 @@ class Api
                 'permission_callback' => '__return_true',
             ]
         );
+        register_rest_route(
+
+            'opuces/v1', // API Name
+            'classifiedAtValidate', // name of route
+            [
+                'methods' => 'get',
+                'callback' => [$this, 'getClassifiedAtValidate'],
+                'permission_callback' => '__return_true',
+            ]
+            );
+        register_rest_route(
+
+            'opuces/v1', // API Name
+            'classifiedValided', // name of route
+            [
+                'methods' => 'put',
+                'callback' => [$this, 'putClassifiedValided'],
+                'permission_callback' => '__return_true',
+            ]
+                    );
         register_rest_route(
 
             'opuces/v1', // API Name
@@ -126,6 +147,15 @@ class Api
             [
                 'methods' => 'get',
                 'callback' => [$this, 'getUserTable'],
+                'permission_callback' => '__return_true',
+            ]
+        );
+        register_rest_route(
+            'opuces/v1',
+            'test-query',
+            [
+                'methods' => 'get',
+                'callback' => [$this, 'getQueryClassified'] ,
                 'permission_callback' => '__return_true',
             ]
         );
@@ -253,17 +283,20 @@ class Api
         // retrieving what has been sent to the api on the endpoint /opuces/v1/taxonomy in get
         $taxonomy = $request->get_param('taxonomy');
         $idParent = $request->get_param('idParent');
-        $termChildren = get_terms(
-            $taxonomy,
-            [
-                'hide_empty' => 0,
-                'parent' => $idParent
-            ]
-        );
+
+        $termChildren = get_terms(  
+        [
+            'taxonomy' => $taxonomy,
+            'hide_empty' => 0,
+            'parent' => $idParent
+          ]);
+        
         if (!is_wp_error($termChildren)) {
-            $success = $termChildren;
-        } else {
-            $success = $termChildren;
+            $success = $termChildren ;
+        }
+        else {
+        $success = false;
+
         }
 
         return
@@ -272,21 +305,237 @@ class Api
             ];
     }
 
+            /**
+       * getCustomTaxonomy
+       *  read Taxo
+       * $request: 
+       * return: {["posts]}
+       * 
+	   */  
+      public function getClassifiedAtValidate(WP_REST_Request $request)
+      {
+        global $wpdb;
+
+        $sql = "
+        SELECT wp_posts.* , wp_postmeta.* , wp_term_relationships.term_taxonomy_id ,  wp_terms.name, wp_term_taxonomy.taxonomy ,
+        user_table.* , wp_termmeta.meta_value as metadeliveryprice
+        FROM wp_posts 
+        INNER JOIN wp_postmeta
+        ON wp_postmeta.post_id = wp_posts.ID
+        INNER JOIN user_table
+        ON user_table.userID = wp_posts.post_author
+        INNER JOIN wp_term_relationships
+        ON wp_term_relationships.object_id = wp_posts.ID
+        INNER JOIN wp_terms
+        ON wp_term_relationships.term_taxonomy_id = wp_terms.term_id
+        INNER JOIN wp_term_taxonomy
+        ON wp_term_taxonomy.term_taxonomy_id = wp_terms.term_id
+        LEFT JOIN wp_termmeta
+        ON wp_termmeta.term_id = wp_terms.term_id
+        WHERE wp_posts.post_type = 'classified' 
+        AND wp_posts.post_status = 'publish' 
+        and wp_postmeta.meta_key = 'classifiedPrice'
+            ";
+
+        //     CASE 
+        //     WHEN wp_term_taxonomy.taxonomy = 'DeliveryMethod'
+        //     THEN (INNER JOIN wp_termmeta
+        //     ON wp_termmeta.term_id = wp_terms.term_id)
+        // END
+            // INNER JOIN wp_termmeta wp_termmeta.meta_value
+            // ON wp_termmeta.term_id = wp_terms.term_id
+                    // and wp_termmeta.meta_key = 'price'
+            $tableClassified = $wpdb->get_results($wpdb->prepare($sql));
+        // $args = 
+        // [ 
+        //     'post_status' => ['notValided'],
+        //     'post_type'   => 'classified',
+        //     // 'meta_key' => "classifiedPrice"
+        // ];
+        //  $arrayPostTaxo=[];
+        //  $terms=[];
+        //  $postsAtValidate = new WP_Query( $args );
+        //  $posts = $postsAtValidate->posts;
+        //  foreach ($posts as $post)
+        //  {
+        //     $id = $post->ID;
+        //     $terms = wp_get_object_terms($id, "ProductCategory" );
+
+        //         foreach ($terms as $term) 
+        //         {
+        //         $arrayPostTaxo['post_id'][$id] = $term->name; ;
+        //         }
+        //         // return [$term];
+        //  }
+
+            return [$tableClassified];
+        // return [$postsAtValidate->posts, $arrayPostTaxo];
+          
+      }
+
+      public function getQueryClassified(WP_REST_Request $request)
+      {
+        $dateStart = $request->get_param('dateStart');
+        $dateEnd = $request->get_param('DateEnd');
+
+       
+        global $wpdb;
+
+        $sql = "
+        SELECT wp_posts.* , wp_postmeta.* , wp_term_relationships.term_taxonomy_id ,  wp_terms.name, wp_term_taxonomy.taxonomy ,
+        user_table.* , wp_termmeta.meta_value as metadeliveryprice
+        FROM wp_posts 
+        INNER JOIN wp_postmeta
+        ON wp_postmeta.post_id = wp_posts.ID
+        INNER JOIN user_table
+        ON user_table.userID = wp_posts.post_author
+        INNER JOIN wp_term_relationships
+        ON wp_term_relationships.object_id = wp_posts.ID
+        INNER JOIN wp_terms
+        ON wp_term_relationships.term_taxonomy_id = wp_terms.term_id
+        INNER JOIN wp_term_taxonomy
+        ON wp_term_taxonomy.term_taxonomy_id = wp_terms.term_id
+        LEFT JOIN wp_termmeta
+        ON wp_termmeta.term_id = wp_terms.term_id
+        WHERE wp_posts.post_type = 'classified' 
+        AND wp_posts.post_status = 'publish' 
+        AND post_date > $dateStart AND post_date < $dateEnd;
+            ";
+
+            $resultQueryClassified = $wpdb->get_results($wpdb->prepare($sql));
+
+            return [$resultQueryClassified];
+
+          
+      }
+       /**
+       * getCustomTaxonomy
+       *  read Taxo
+       * $request: {post_id, "$newStatus= "publish","trash","noValided"}
+       * return: id/0
+       * 
+	   */  
+      public function putClassifiedValided(WP_REST_Request $request)
+      {
+        $post_id = $request->get_param('post_id');
+        $newStatus = $request->get_param('newStatus');
+
+        $argsPost = 
+            [
+                'post_status' => $newStatus,
+                'post_type' => 'classified',
+                'ID' => $post_id
+            ];
+
+        $statusChangeResult = wp_update_post
+            (
+                $argsPost,
+            );
+
+        
+        return [$statusChangeResult];
+          
+      }
     /**
-     * createCustomTaxonomy
-     *  create & update post classified
-     * $request: {icategory,"name","parentCategory","description"
-     * return: succes = creation/modif
-     * 
-     */
-    public function createCustomTaxonomy(WP_REST_Request $request)
-    {
-        // retrieving what has been sent to the api on the endpoint /opuces/v1/create-custom-taxonomy in POST
-        $categoryId = $request->get_param('categoryId');
-        $name = $request->get_param('name');
-        $parentCategory = $request->get_param('parentCategory');
-        $description = $request->get_param('description');
-        $taxonomy = $request->get_param('taxonomy');
+       * createCustomTaxonomy
+       *  create & update post classified
+       * $request: {categoryId,"name","parentCategory","description","taxonomy"
+       * return: succes = creation/modif
+       * 
+	   */  
+      public function createCustomTaxonomy(WP_REST_Request $request)
+      {
+          // retrieving what has been sent to the api on the endpoint /opuces/v1/create-custom-taxonomy in POST
+          $categoryId = $request->get_param('categoryId');
+          $name = $request->get_param('name');
+          $parentCategory = $request->get_param('parentCategory');
+          $description = $request->get_param('description');
+          $taxonomy = $request ->get_param('taxonomy');
+
+  
+          //inserting parentcategory
+          $term_id = get_term_by('name', $parentCategory, $taxonomy);
+          $categoryIdParent = $term_id->term_id;
+  
+          $args = [
+              'description' => $description,
+              'slug' => '',
+              'parent' => $categoryIdParent
+          ];
+          //creating a new custom taxonomy
+          $createCustomTaxonomyResult = wp_insert_term(
+              $name,
+              $categoryId,
+              $args
+          );
+  
+          //verification if custom taxonomy has been created
+          if (is_int($createCustomTaxonomyResult)) {
+              return [
+                  'success' => true,
+              ];
+          }
+          if (is_wp_error($createCustomTaxonomyResult)) {
+              return [
+                  'success' => false,
+                  'error' => $createCustomTaxonomyResult
+                  ];
+          } else {
+              return [
+                  'success' => true              
+              ];
+          };
+  
+  
+      } //<-- end of public function createCustomTaxonomy
+  
+      /**
+       * Update a custom taxonomy
+       */
+  
+      public function updateCustomTaxonomy(WP_REST_Request $request)
+      {
+          // retrieving what has been sent to the api on the endpoint /opuces/v1/update-taxonomy in PUT
+          $categoryId = $request->get_param('categoryId');
+          $parentCategory = $request->get_param('parentCategory');
+          $description = $request->get_param('description');
+          $taxonomy = $request ->get_param('taxonomy');
+          $name = $request ->get_param('name');
+
+  
+          $updateTaxonomy = wp_update_term(
+              $categoryId, 
+              $taxonomy,
+              [
+              'alias_of' => '',
+              'description' => $description,
+              'parent' => $parentCategory,
+              'slug' => '',
+              'name' => $name
+              ]
+  
+          );
+  
+          if ( ! is_wp_error($updateTaxonomy))
+          {
+              echo 'Success!';
+          } else {
+              return [
+              'success' => false,
+              'error' => $updateTaxonomy
+              ];
+          };
+      
+      } // <-- end of public function updateTaxonomy
+        
+    
+          /**
+       * saveClassified
+       *  create & update post classified
+       * $request: {post_id,"content","title",author,price,[ProductCategory],[DeliveryMethod],"ProductState"
+       * return: succes = creation/modif
+       * 
+	   */ 
 
 
         //inserting parentcategory
@@ -388,20 +637,31 @@ class Api
 
         // on regarde si c'est pour une creation ou une modification
         $postStatus = get_post_status($post_id);
+        $argsPost = 
+        [
+            'ID' => $post_id,
+            'post_title' => $title,
+            'post_excerpt' => $description,
+            'post_author'  =>  $user,
+            'post_type' => 'classified',
+            'post_content' => $content
+        ];
+        $user = wp_get_current_user();
         
-        $argsPost =
-            [
-                'ID' => $post_id,
-                'post_title' => $title,
-                'post_excerpt' => $description,
-                'post_type' => 'classified',
-                'post_status' => 'publish',
-                'post_content' => $content,
-            
-            ];
-        
-        if (!$postStatus) {
-            $classifiedSaveResult = wp_insert_post(
+        if ($classifiedBuyerId > 0) 
+        {         
+             $argsPost['post_status'] = 'vendu';
+        }
+        else{
+            $argsPost['post_status'] = 'publish';
+        }
+
+        if (!$postStatus) 
+        {
+            // $argsPost['post_status'] = 'notValided';
+
+            $classifiedSaveResult = wp_insert_post
+            (
                 $argsPost
             );
         } else {
@@ -409,34 +669,67 @@ class Api
                 $argsPost
             );
         }
-        // si pas d erreur je met a jout taxo & custum field
-        if (!is_wp_error($classifiedSaveResult)) {
-            $success = true;
-            // les 3 premiers wp_set_object servent a effacer les taxo existantes si elles existent
-            wp_set_object_terms($classifiedSaveResult, null, 'ProductCategory');
-            wp_set_object_terms($classifiedSaveResult, null, 'DeliveryMethod');
-            wp_set_object_terms($classifiedSaveResult, null, 'ProductState');
-            wp_set_object_terms($classifiedSaveResult, $idProduct, 'ProductCategory');
-            wp_set_object_terms($classifiedSaveResult, $idDelivery, 'DeliveryMethod');
-            wp_set_object_terms($classifiedSaveResult, $idState, 'ProductState');
 
-            if ($price > 0) {
-                $keyMeta = 'classifiedPrice';
-                // test si une meta existe
-                if (get_post_meta($classifiedSaveResult, $keyMeta, true)) {
-                    update_post_meta($classifiedSaveResult, $keyMeta, $price);
-                } else {
-                    add_post_meta($classifiedSaveResult, $keyMeta, $price, $unique = true);
+            // si pas d erreur je met a jour taxo & custum field
+            if (!is_wp_error($classifiedSaveResult)) {
+                $success = true;
+            // les 3 premiers wp_set_object servent a effacer les taxo existantes si elles existent
+                wp_set_object_terms($classifiedSaveResult, null, 'ProductCategory');
+                wp_set_object_terms($classifiedSaveResult, null, 'DeliveryMethod');
+                wp_set_object_terms($classifiedSaveResult, null, 'ProductState');
+                wp_set_object_terms($classifiedSaveResult, $idProduct, 'ProductCategory');
+                wp_set_object_terms($classifiedSaveResult, $idDelivery, 'DeliveryMethod');
+                wp_set_object_terms($classifiedSaveResult, $idState, 'ProductState');
+
+                // recuperation des parents d une categorie
+                $terms = get_the_terms( $classifiedSaveResult, 'ProductCategory' );
+                $categorieparent_id = [];
+                // pour chaque term récupéré 
+                foreach ( $terms as $term ) { // pour chaque term récupéré
+                        // s'il n'a pas de parent
+                        if ($term->parent == 0){
+                            // et bien on le tient, c'est le parent
+                            $categorieparent_id[] = $term->term_id; 
+                        // sinon
+                        } else {
+                            // on va chercher ses parents
+                            $categorieparent_id[] = $term->parent;
+                    }
                 }
-            }
-            // si objet achete
-            if ($classifiedBuyerId > 0) {
-                $keyMeta = 'classifiedBuyerId';
-                // test si une meta existe
-                if (get_post_meta($classifiedSaveResult, $keyMeta, true)) {
-                    update_post_meta($classifiedSaveResult, $keyMeta, $classifiedBuyerId);
-                } else {
-                    add_post_meta($classifiedSaveResult, $keyMeta, $classifiedBuyerId, $unique = true);
+                // puis on prend le premier terme trouvé
+                    $term_categorieparent_id = $categorieparent_id[0];
+                    wp_set_post_terms($classifiedSaveResult, [$term_categorieparent_id] , 'ProductCategory', $append = true);
+    
+                if ($price > 0) 
+                {
+                    $keyMeta ='classifiedPrice';
+                    // test si une meta existe
+                    if (get_post_meta($classifiedSaveResult, $keyMeta, true ) ) {
+                        update_post_meta($classifiedSaveResult, $keyMeta, $price);
+                    }
+                    else {
+                        add_post_meta($classifiedSaveResult, $keyMeta, $price, $unique = true);
+                    }
+                }
+                // je met a jour l'image
+                if($imageId) {
+                    set_post_thumbnail(
+                        $classifiedSaveResult,
+                        $imageId
+                    );
+                }
+                // si objet achete
+                if ($classifiedBuyerId > 0) 
+                {
+                    $keyMeta ='classifiedBuyerId';
+                    // test si une meta existe
+                    if (get_post_meta($classifiedSaveResult, $keyMeta, true ) ) {
+                        update_post_meta($classifiedSaveResult, $keyMeta, $classifiedBuyerId);
+                    }
+                    else {
+                        add_post_meta($classifiedSaveResult, $keyMeta, $classifiedBuyerId, $unique = true);
+                    }
+
                 }
             }
         } else {
@@ -458,6 +751,7 @@ class Api
                 'ProductState' => $idState,
                 'classifiedBuyerId' => $classifiedBuyerId
             ];
+
     }
 
     // demande de token pour nouveau mot de passe
