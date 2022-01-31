@@ -297,30 +297,62 @@ class Api {
 	   */  
       public function getClassifiedAtValidate(WP_REST_Request $request)
       {
-        $args = 
-        [ 
-            'post_status' => ['notValided'],
-            'post_type'   => 'classified',
-            // 'meta_key' => "classifiedPrice"
-        ];
-         $arrayPostTaxo=[];
-         $terms=[];
-         $postsAtValidate = new WP_Query( $args );
-         $posts = $postsAtValidate->posts;
-         foreach ($posts as $post)
-         {
-            $id = $post->ID;
-            $terms = wp_get_object_terms($id, "ProductCategory" );
+        global $wpdb;
 
-                foreach ($terms as $term) 
-                {
-                $arrayPostTaxo['post_id'][$id] = $term->name; ;
-                }
-                // return [$term];
-         }
+        $sql = "
+        SELECT wp_posts.* , wp_postmeta.* , wp_term_relationships.term_taxonomy_id ,  wp_terms.name, wp_term_taxonomy.taxonomy ,
+        user_table.* , wp_termmeta.meta_value as metadeliveryprice
+        FROM wp_posts 
+        INNER JOIN wp_postmeta
+        ON wp_postmeta.post_id = wp_posts.ID
+        INNER JOIN user_table
+        ON user_table.userID = wp_posts.post_author
+        INNER JOIN wp_term_relationships
+        ON wp_term_relationships.object_id = wp_posts.ID
+        INNER JOIN wp_terms
+        ON wp_term_relationships.term_taxonomy_id = wp_terms.term_id
+        INNER JOIN wp_term_taxonomy
+        ON wp_term_taxonomy.term_taxonomy_id = wp_terms.term_id
+        LEFT JOIN wp_termmeta
+        ON wp_termmeta.term_id = wp_terms.term_id
+        WHERE wp_posts.post_type = 'classified' 
+        AND wp_posts.post_status = 'publish' 
+        and wp_postmeta.meta_key = 'classifiedPrice'
+            ";
 
+        //     CASE 
+        //     WHEN wp_term_taxonomy.taxonomy = 'DeliveryMethod'
+        //     THEN (INNER JOIN wp_termmeta
+        //     ON wp_termmeta.term_id = wp_terms.term_id)
+        // END
+            // INNER JOIN wp_termmeta wp_termmeta.meta_value
+            // ON wp_termmeta.term_id = wp_terms.term_id
+                    // and wp_termmeta.meta_key = 'price'
+            $tableClassified = $wpdb->get_results($wpdb->prepare($sql));
+        // $args = 
+        // [ 
+        //     'post_status' => ['notValided'],
+        //     'post_type'   => 'classified',
+        //     // 'meta_key' => "classifiedPrice"
+        // ];
+        //  $arrayPostTaxo=[];
+        //  $terms=[];
+        //  $postsAtValidate = new WP_Query( $args );
+        //  $posts = $postsAtValidate->posts;
+        //  foreach ($posts as $post)
+        //  {
+        //     $id = $post->ID;
+        //     $terms = wp_get_object_terms($id, "ProductCategory" );
 
-        return [$postsAtValidate->posts, $arrayPostTaxo];
+        //         foreach ($terms as $term) 
+        //         {
+        //         $arrayPostTaxo['post_id'][$id] = $term->name; ;
+        //         }
+        //         // return [$term];
+        //  }
+
+            return [$tableClassified];
+        // return [$postsAtValidate->posts, $arrayPostTaxo];
           
       }
        /**
@@ -459,7 +491,7 @@ class Api {
         $idDelivery =[];
         $title = $request->get_param('title');
         $description = $request->get_param('content');
-        $author = $request->get_param('author'); //! Modifier pour supprimer le user forcé et mettre wp_current_user
+        // $author = $request->get_param('author'); //! Modifier pour supprimer le user forcé et mettre wp_current_user
         $price = $request->get_param('price');
         $idProduct = $request->get_param('ProductCategorie');
         $idDelivery = $request->get_param('DeliveryMethod');
@@ -473,13 +505,13 @@ class Api {
         // on regarde si c'est pour une creation ou une modification
         $postStatus = get_post_status($post_id);
 
-
+        $user = wp_get_current_user();
         $argsPost = 
         [
             'ID' => $post_id,
             'post_title' => $title,
             'post_content' => $description,
-            'post_author'  =>  $author,
+            'post_author'  =>  $user,
             'post_type' => 'classified',
         ];
         $user = wp_get_current_user();
@@ -540,7 +572,7 @@ class Api {
                 }
                 // puis on prend le premier terme trouvé
                     $term_categorieparent_id = $categorieparent_id[0];
-                    wp_set_object_terms($classifiedSaveResult, $term_categorieparent_id , 'ProductCategory');
+                    wp_set_post_terms($classifiedSaveResult, [$term_categorieparent_id] , 'ProductCategory', $append = true);
     
                 if ($price > 0) 
                 {
