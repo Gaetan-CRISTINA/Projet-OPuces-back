@@ -165,6 +165,7 @@ class Plugin
                 'show_in_rest' => true //rendre accessible avec API Wordpress
             ]
         ); 
+
         //     // creation d un post classified
         //     $argsPost = 
         // [
@@ -177,6 +178,11 @@ class Plugin
         //         // creation des custum fields attaches a classified classifiedPrice
         //         add_post_meta($classifiedSaveResult , "classifiedBuyerId" , 1 , $unique = true);
         //         add_post_meta($classifiedSaveResult , "classifiedPrice" , 1 , $unique = true);
+
+        // creation des custum fiels attaches a classified classifiedPrice
+        add_post_meta(1 , "classifiedBuyerId" , 1 , $unique = true);
+        add_post_meta(1 , "classifiedPrice" , 1 , $unique = true);
+
 
     }
        
@@ -595,6 +601,23 @@ class Plugin
         );
     }
 
+    public function registerPostStatus()
+    {
+        register_post_status(
+            // identifiant du status 
+            'notValidate',
+            [
+            'label' => 'A validé',
+            'exclude_from_search' => true,
+            'public' => false,
+            'publicly_queryable' => false,
+            'show_in_admin_status_list' => true,
+            'show_in_admin_all_list' => true,
+            'label_count'=> _n_noop( 'A valider <span class="count">(%s)</span>', 'A validé <span class="count">(%s)</span>' ),
+            ]
+        );
+    }  
+
     /**
      * Method to deactivate Plugin
      * 
@@ -604,25 +627,23 @@ class Plugin
         // purge des taxo
         $arrayTaxos = [ "ProductState","SellerRate","ProductCategory","DeliveryMethod"];
 
-
-        foreach ($arrayTaxos as $taxo) {
+        foreach ($arrayTaxos as $taxo) 
+        {
             $term_args = array(
-            'taxonomy' => $taxo,
-            'hide_empty' => false,
-            'orderby' => 'name',
-            'order' => 'ASC'
-             
-        );
-        
+                'taxonomy' => $taxo,
+                'hide_empty' => false,                
+                'orderby' => 'name',                
+                'order' => 'ASC'                
+                );
+                
             $terms = get_terms($term_args);
 
-            foreach ($terms as $term) {
+            foreach ($terms as $term) 
+            {
                 wp_delete_term($term->term_id, $taxo);
             }
         }
     }
-
-    
 
 
     /**
