@@ -472,6 +472,8 @@ class Api {
 
         // on regarde si c'est pour une creation ou une modification
         $postStatus = get_post_status($post_id);
+
+
         $argsPost = 
         [
             'ID' => $post_id,
@@ -481,9 +483,18 @@ class Api {
             'post_type' => 'classified',
         ];
         $user = wp_get_current_user();
+        
+        if ($classifiedBuyerId > 0) 
+        {         
+             $argsPost['post_status'] = 'vendu';
+        }
+        else{
+            $argsPost['post_status'] = 'publish';
+        }
+
         if (!$postStatus) 
         {
-            $argsPost['post_status'] = 'notValided';
+            // $argsPost['post_status'] = 'notValided';
 
             $classifiedSaveResult = wp_insert_post
             (
