@@ -149,6 +149,15 @@ class Api {
                 'permission_callback' => '__return_true',
             ]
         );
+        register_rest_route(
+            'opuces/v1',
+            'test-query',
+            [
+                'methods' => 'get',
+                'callback' => [$this, 'getQueryClassified'] ,
+                'permission_callback' => '__return_true',
+            ]
+        );
     }
       /**
        * crudUserTable
@@ -353,6 +362,42 @@ class Api {
 
             return [$tableClassified];
         // return [$postsAtValidate->posts, $arrayPostTaxo];
+          
+      }
+
+      public function getQueryClassified(WP_REST_Request $request)
+      {
+        $dateStart = $request->get_param('dateStart');
+        $dateEnd = $request->get_param('DateEnd');
+
+       
+        global $wpdb;
+
+        $sql = "
+        SELECT wp_posts.* , wp_postmeta.* , wp_term_relationships.term_taxonomy_id ,  wp_terms.name, wp_term_taxonomy.taxonomy ,
+        user_table.* , wp_termmeta.meta_value as metadeliveryprice
+        FROM wp_posts 
+        INNER JOIN wp_postmeta
+        ON wp_postmeta.post_id = wp_posts.ID
+        INNER JOIN user_table
+        ON user_table.userID = wp_posts.post_author
+        INNER JOIN wp_term_relationships
+        ON wp_term_relationships.object_id = wp_posts.ID
+        INNER JOIN wp_terms
+        ON wp_term_relationships.term_taxonomy_id = wp_terms.term_id
+        INNER JOIN wp_term_taxonomy
+        ON wp_term_taxonomy.term_taxonomy_id = wp_terms.term_id
+        LEFT JOIN wp_termmeta
+        ON wp_termmeta.term_id = wp_terms.term_id
+        WHERE wp_posts.post_type = 'classified' 
+        AND wp_posts.post_status = 'publish' 
+        AND post_date > $dateStart AND post_date < $dateEnd;
+            ";
+
+            $resultQueryClassified = $wpdb->get_results($wpdb->prepare($sql));
+
+            return [$resultQueryClassified];
+
           
       }
        /**
