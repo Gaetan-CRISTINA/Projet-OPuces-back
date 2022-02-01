@@ -4,7 +4,6 @@ namespace OPuces;
 
 use WP_REST_Request;
 use WP_USER;
-use WP_Query;
 
 class Api
 {
@@ -141,6 +140,7 @@ class Api
                 'permission_callback' => '__return_true',
             ]
         );
+
     }
 
     /**
@@ -260,32 +260,14 @@ class Api
      * return: {["nomtaxo",idparent, "name"]}
      * 
      */
-    public function getCustomTaxonomy(WP_REST_Request $request)
+    public function getCustomTaxonomy($id)
     {
-        // retrieving what has been sent to the api on the endpoint /opuces/v1/taxonomy in get
-        $taxonomy = $request->get_param('taxonomy');
-        $idParent = $request->get_param('idParent');
-
-        $termChildren = get_terms(
-            [
-                'taxonomy' => $taxonomy,
-                'hide_empty' => 0,
-                'parent' => $idParent
-            ]
-        );
-
-        if (!is_wp_error($termChildren)) {
-            $success = $termChildren;
-        } else {
-            $success = false;
-        }
-
-        return
-            [
-                'success' => $success,
-            ];
+        global $wpdb;
+        $sql = ("SELECT * FROM `wp_terms`");
+        $resultQueryTaxonomy = $wpdb->get_results($wpdb->prepare($sql));
+        return [$resultQueryTaxonomy];
+               
     }
-
 
     public function getQueryClassified(WP_REST_Request $request)
     {
@@ -466,7 +448,7 @@ class Api
         $idDelivery = [];
         $title = $request->get_param('title');
         $description = $request->get_param('description');
-        $user = get_current_user_id();
+        
         $price = $request->get_param('price');
         $idProduct = $request->get_param('ProductCategorie');
         $idDelivery = $request->get_param('DeliveryMethod');
@@ -476,8 +458,8 @@ class Api
         $content = $request->get_param('content');
         $imageId = $request->get_param('imageId');
 
-        // récupération de l'utilisateur ayant envoyé la requête
-
+        $user = wp_get_current_user();
+        
         // on regarde si c'est pour une creation ou une modification
         $postStatus = get_post_status($post_id);
         $argsPost =
@@ -487,27 +469,15 @@ class Api
                 'post_excerpt' => $description,
                 'post_author'  =>  $user,
                 'post_type' => 'classified',
-                'post_content' => $content
+                'post_content' => $content,
+                'post_status' => 'publish'
             ];
         $user = wp_get_current_user();
 
-        if ($classifiedBuyerId > 0) {
-            $argsPost['post_status'] = 'vendu';
-        } else {
-            $argsPost['post_status'] = 'publish';
-        }
-
-        if (!$postStatus) {
-            // $argsPost['post_status'] = 'notValided';
-
-            $classifiedSaveResult = wp_insert_post(
-                $argsPost
-            );
-        } else {
-            $classifiedSaveResult = wp_update_post(
-                $argsPost
-            );
-        }
+        $classifiedSaveResult = wp_insert_post(
+            $argsPost
+        );
+        
 
         // si pas d erreur je met a jour taxo & custum field
         if (!is_wp_error($classifiedSaveResult)) {
