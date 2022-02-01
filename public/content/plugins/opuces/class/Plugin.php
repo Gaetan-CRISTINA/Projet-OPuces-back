@@ -338,8 +338,5 @@ class Plugin
             $role->add_cap('publish_' . $customCap . 's');
             $role->add_cap('read_private_' . $customCap . 's');
         }
-    }
-
-
-    
+    } 
 }
