@@ -140,6 +140,7 @@ class Api
                 'permission_callback' => '__return_true',
             ]
         );
+
     }
 
     /**
@@ -259,32 +260,14 @@ class Api
      * return: {["nomtaxo",idparent, "name"]}
      * 
      */
-    public function getCustomTaxonomy(WP_REST_Request $request)
+    public function getCustomTaxonomy($id)
     {
-        // retrieving what has been sent to the api on the endpoint /opuces/v1/taxonomy in get
-        $taxonomy = $request->get_param('taxonomy');
-        $idParent = $request->get_param('idParent');
-
-        $termChildren = get_terms(
-            [
-                'taxonomy' => $taxonomy,
-                'hide_empty' => 0,
-                'parent' => $idParent
-            ]
-        );
-
-        if (!is_wp_error($termChildren)) {
-            $success = $termChildren;
-        } else {
-            $success = false;
-        }
-
-        return
-            [
-                'success' => $success,
-            ];
+        global $wpdb;
+        $sql = ("SELECT * FROM `wp_terms`");
+        $resultQueryTaxonomy = $wpdb->get_results($wpdb->prepare($sql));
+        return [$resultQueryTaxonomy];
+               
     }
-
 
     public function getQueryClassified(WP_REST_Request $request)
     {
