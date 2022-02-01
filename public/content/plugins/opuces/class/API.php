@@ -140,9 +140,23 @@ class Api
                 'permission_callback' => '__return_true',
             ]
         );
+        register_rest_route(
+            'opuces/v1',
+            'userIdLogged',
+            [
+                'methods' => 'get',
+                'callback' => [$this, 'getCurrentUserId'],
+                'permission_callback' => '__return_true',
+            ]
+        );
 
     }
 
+    public function getCurrentUserId()
+    {
+        $user = get_current_user_id();
+        return $user;
+    }
     /**
      * crudUserTable
      *  create & update user_table
