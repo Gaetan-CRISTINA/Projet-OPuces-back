@@ -443,7 +443,7 @@ class Api
      */
     public function saveClassified(WP_REST_Request $request)
     {
-
+        
         $idProduct = [];
         $idDelivery = [];
         $title = $request->get_param('title');
@@ -453,26 +453,27 @@ class Api
         $idProduct = $request->get_param('ProductCategorie');
         $idDelivery = $request->get_param('DeliveryMethod');
         $idState = $request->get_param('ProductState');
-        $post_id = $request->get_param('post_id');
         $classifiedBuyerId = $request->get_param('classifiedBuyerId');
         $content = $request->get_param('content');
         $imageId = $request->get_param('imageId');
+        $post_id = $request->get_param('post_id');
 
-        $user = wp_get_current_user();
         
         // on regarde si c'est pour une creation ou une modification
-        $postStatus = get_post_status($post_id);
         $argsPost =
             [
-                'ID' => $post_id,
                 'post_title' => $title,
                 'post_excerpt' => $description,
-                'post_author'  =>  $user,
+                'post_author'  =>  get_current_user_id(),
                 'post_type' => 'classified',
                 'post_content' => $content,
                 'post_status' => 'publish'
             ];
         $user = wp_get_current_user();
+
+        if($post_id) {
+            $argsPost['ID'] = $post_id;
+        }
 
         $classifiedSaveResult = wp_insert_post(
             $argsPost
@@ -542,7 +543,7 @@ class Api
             [
                 'success' => $success,
                 'post_id' => $classifiedSaveResult,
-                'post_status' => $postStatus,
+                'post_status' => 'publish',
                 'title' => $title,
                 'auteur' => $user,
                 'description' => $description,
