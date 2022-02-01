@@ -150,11 +150,26 @@ class Api
             ]
         );
 
+        register_rest_route(
+            'opuces/v1',
+            'CurrentUserLogged',
+            [
+                'methods' => 'get',
+                'callback' => [$this, 'getCurrentUserLogged'],
+                'permission_callback' => '__return_true',
+            ]
+        );
+
     }
 
     public function getCurrentUserId()
     {
         $user = get_current_user_id();
+        return $user;
+    }
+    public function getCurrentUserLogged()
+    {
+        $user = wp_get_current_user();
         return $user;
     }
     /**
