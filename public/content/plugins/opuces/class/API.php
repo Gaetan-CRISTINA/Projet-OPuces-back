@@ -254,7 +254,7 @@ class Api
             'user_login' => $userName,
             'user_pass' => $password,
             'user_email' => $email,
-            'role' => 'user'
+            'role' => 'customer'
         );
         if ($password === $confirmPassword) {
             $createUserResult = wp_insert_user($user_data);
@@ -270,7 +270,7 @@ class Api
                 'userId' => $createUserResult,
                 'userName' => $userName,
                 'email' => $email,
-                'role' => 'user',
+                'role' => 'customer',
                 // 'image' => $image,
             ];
         } else {

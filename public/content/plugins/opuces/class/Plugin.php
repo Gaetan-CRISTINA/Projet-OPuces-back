@@ -266,9 +266,11 @@ class Plugin
     {
         add_role(
             // identifiant du role 
-            'user',
+            // 'user',
+            'customer',
             // libellé
-            'Utilisateur',
+            // 'Utilisateur',
+            'Client',
             // liste des autorisatrions
             [
                 'delete_user' => false,
@@ -281,6 +283,8 @@ class Plugin
                 'edit_published_user' => true,
                 'publish_user' => false,
                 'read_private_user' => false,
+
+                'delete_published_classifieds' => true
             ]
         );
     }
