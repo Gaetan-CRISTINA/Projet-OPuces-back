@@ -133,7 +133,7 @@ class Api
         );
         register_rest_route(
             'opuces/v1',
-            'test-query',
+            'queryClassified',
             [
                 'methods' => 'get',
                 'callback' => [$this, 'getQueryClassified'],
@@ -301,19 +301,16 @@ class Api
     public function getQueryClassified(WP_REST_Request $request)
     {
         $dateStart = $request->get_param('dateStart');
-        $dateEnd = $request->get_param('DateEnd');
-
+        $dateEnd = $request->get_param('dateEnd');
+        $city = $request->get_param('city');
+        $priceMax = $request->get_param('priceMax');
+        $priceMin = $request->get_param('priceMin');
+        $taxo = $request->get_param('taxo');
 
         global $wpdb;
-
-        $sql = "
-        SELECT wp_posts.* , wp_postmeta.* , wp_term_relationships.term_taxonomy_id ,  wp_terms.name, wp_term_taxonomy.taxonomy ,
-        user_table.* , wp_termmeta.meta_value as metadeliveryprice
-        FROM wp_posts 
+        $from =" FROM wp_posts 
         INNER JOIN wp_postmeta
         ON wp_postmeta.post_id = wp_posts.ID
-        INNER JOIN user_table
-        ON user_table.userID = wp_posts.post_author
         INNER JOIN wp_term_relationships
         ON wp_term_relationships.object_id = wp_posts.ID
         INNER JOIN wp_terms
@@ -321,13 +318,47 @@ class Api
         INNER JOIN wp_term_taxonomy
         ON wp_term_taxonomy.term_taxonomy_id = wp_terms.term_id
         LEFT JOIN wp_termmeta
-        ON wp_termmeta.term_id = wp_terms.term_id
-        WHERE wp_posts.post_type = 'classified' 
-        AND wp_posts.post_status = 'publish' 
-        AND post_date > $dateStart AND post_date < $dateEnd;
-            ";
+        ON wp_termmeta.term_id = wp_terms.term_id";
 
-        $resultQueryClassified = $wpdb->get_results($wpdb->prepare($sql));
+        // $fields ="SELECT wp_posts.* , wp_postmeta.* , wp_term_relationships.term_taxonomy_id ,  wp_terms.name, wp_term_taxonomy.taxonomy ,
+        // user_table.* , wp_termmeta.meta_value as metaDeliveryPrice";
+        $fields ="SELECT wp_posts.* , wp_postmeta.* , wp_term_relationships.term_taxonomy_id ,  wp_terms.name, wp_term_taxonomy.taxonomy ,
+        user_table.* , wp_termmeta.meta_value as metaDeliveryPrice";
+
+        $where = " WHERE 
+        wp_posts.post_type = 'classified' 
+        AND wp_posts.post_status = 'publish' 
+        And wp_term_taxonomy.taxonomy = 'ProductCategory'
+                  ";
+        $superWhere = $wpdb->prepare($where);
+        $superFrom = $wpdb->prepare($from);
+
+        if($city) {
+            $addWhere = $wpdb->prepare(' AND {$wpdb->prefix}user_table.city = %s', $city);
+            $superWhere.= $addWhere;
+            $addFrom = $wpdb->prepare(' INNER JOIN user_table
+            ON user_table.userID = wp_posts.post_author' );
+            $superFrom.= $addFrom;
+        }
+        if($taxo){
+            $addWhere = $wpdb->prepare(' AND wp_term_relationships.term_taxonomy_id = %s', $taxo);
+            $superWhere.= $addWhere;
+        }        
+        if($priceMax){
+            $addWhere = $wpdb->prepare(' AND wp_postmeta.meta_value between %s AND %s', $priceMin , $priceMax);
+            $superWhere.= $addWhere;
+        }
+        if($dateStart){
+            $addWhere = $wpdb->prepare(' AND wp_posts.post_date between %s AND %s', $dateStart , $dateEnd);
+            $superWhere.= $addWhere;
+        }
+
+        $superQuery = $fields;
+        $superQuery .= $superFrom;
+        $superQuery .= $superWhere;
+            // $sql = $wpdb->get_var($wpdb->prepare("SELECT $fields FROM `$from` WHERE $where ", $dateStart, $dateEnd));
+
+         $resultQueryClassified = $wpdb->get_results($wpdb->prepare($superQuery ));
 
         return [$resultQueryClassified];
     }
