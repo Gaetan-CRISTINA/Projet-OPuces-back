@@ -172,6 +172,7 @@ class Api
         $user = wp_get_current_user();
         return $user;
     }
+
     /**
      * crudUserTable
      *  create & update user_table
@@ -182,9 +183,11 @@ class Api
      */
     public function crudUserTable(WP_REST_Request $request)
     {
+        $user = get_current_user_id();
         // $crud = $request->get_param('crud');
         $data = [
-            'userID' => $request->get_param('userID'), //! Modifier pour supprimer le user forcé et mettre wp_current_user
+            // 'userID' => get_current_user_id() , //! Modifier pour supprimer le user forcé et mettre wp_current_user
+            'userID' => $user,
             'adress1' => $request->get_param('adress1'),
             'adress2' => $request->get_param('adress2'),
             'zipcode' => $request->get_param('zipcode'),
@@ -198,21 +201,20 @@ class Api
 
         global $wpdb;
 
-        $userID = $request->get_param('userID');
         $table_name = 'user_table';
         // prepare <==> prepare  de pdo 
         // %s – string (value is escaped and wrapped in quotes)
         // %d – integer
         // %f – float
         // %% – % sign
-        $user_count = $wpdb->get_var($wpdb->prepare("SELECT count(*) FROM `$table_name` WHERE userID = %d", $userID));
+        $user_count = $wpdb->get_var($wpdb->prepare("SELECT count(*) FROM `$table_name` WHERE userID = %d", $user));
 
         if ($user_count == 0) {
             $wpdb->insert('user_table', $data);
             $succes = 'insert';
         } else {
             $where =
-                ['userID' => $userID];
+                ['userID' => $user];
             $wpdb->update('user_table', $data, $where);
             $succes = 'update';
         }
@@ -381,15 +383,6 @@ class Api
                 'success' => true
             ];
         };
-
-        /**
-         * saveClassified
-         *  create & update post classified
-         * $request: {post_id,"content","title",author,price,[ProductCategory],[DeliveryMethod],"ProductState"
-         * return: succes = creation/modif
-         * 
-         */
-
 
         //inserting parentcategory
         $term_id = get_term_by('name', $parentCategory, $taxonomy);
