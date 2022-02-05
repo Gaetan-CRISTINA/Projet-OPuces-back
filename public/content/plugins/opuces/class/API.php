@@ -323,7 +323,7 @@ class Api
         // $fields ="SELECT wp_posts.* , wp_postmeta.* , wp_term_relationships.term_taxonomy_id ,  wp_terms.name, wp_term_taxonomy.taxonomy ,
         // user_table.* , wp_termmeta.meta_value as metaDeliveryPrice";
         $fields ="SELECT wp_posts.* , wp_postmeta.* , wp_term_relationships.term_taxonomy_id ,  wp_terms.name, wp_term_taxonomy.taxonomy ,
-        user_table.* , wp_termmeta.meta_value as metaDeliveryPrice";
+         wp_termmeta.meta_value as metaDeliveryPrice";
 
         $where = " WHERE 
         wp_posts.post_type = 'classified' 
@@ -345,7 +345,7 @@ class Api
             $superWhere.= $addWhere;
         }        
         if($priceMax){
-            $addWhere = $wpdb->prepare(' AND wp_postmeta.meta_value between %s AND %s', $priceMin , $priceMax);
+            $addWhere = $wpdb->prepare(' AND CAST(wp_postmeta.meta_value AS INTEGER) between %s AND %s', $priceMin , $priceMax);
             $superWhere.= $addWhere;
         }
         if($dateStart){
