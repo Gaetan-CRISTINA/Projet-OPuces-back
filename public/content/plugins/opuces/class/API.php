@@ -323,7 +323,7 @@ class Api
         // $fields ="SELECT wp_posts.* , wp_postmeta.* , wp_term_relationships.term_taxonomy_id ,  wp_terms.name, wp_term_taxonomy.taxonomy ,
         // user_table.* , wp_termmeta.meta_value as metaDeliveryPrice";
         $fields ="SELECT wp_posts.* , wp_postmeta.* , wp_term_relationships.term_taxonomy_id ,  wp_terms.name, wp_term_taxonomy.taxonomy ,
-         wp_termmeta.meta_value as metaDeliveryPrice";
+        wp_termmeta.meta_value as metaDeliveryPrice";
 
         $where = " WHERE 
         wp_posts.post_type = 'classified' 
@@ -334,7 +334,7 @@ class Api
         $superFrom = $wpdb->prepare($from);
 
         if($city) {
-            $addWhere = $wpdb->prepare(' AND {$wpdb->prefix}user_table.city = %s', $city);
+            $addWhere = $wpdb->prepare(' AND user_table.city = %s', $city);
             $superWhere.= $addWhere;
             $addFrom = $wpdb->prepare(' INNER JOIN user_table
             ON user_table.userID = wp_posts.post_author' );
