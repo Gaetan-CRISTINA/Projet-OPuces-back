@@ -160,9 +160,9 @@ class Api
         );
 
     }
-    public function updatePasswordUser()
+    public function updatePasswordUser(WP_REST_Request $request)
     {
-        
+
     }
 
     public function getCurrentUserId()
