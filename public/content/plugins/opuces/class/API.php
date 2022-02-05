@@ -149,7 +149,20 @@ class Api
                 'permission_callback' => '__return_true',
             ]
         );
+        register_rest_route(
+            'opuces/v1',
+            'UpdatePassword',
+            [
+                'methods' => 'get',
+                'callback' => [$this, 'updatePasswordUser'],
+                'permission_callback' => '__return_true',
+            ]
+        );
 
+    }
+    public function updatePasswordUser()
+    {
+        
     }
 
     public function getCurrentUserId()
