@@ -184,9 +184,10 @@ class Api
     public function crudUserTable(WP_REST_Request $request)
     {
         $user = get_current_user_id();
-        // $crud = $request->get_param('crud');
+        //le token doit être envoyé
+       
         $data = [
-            // 'userID' => get_current_user_id() , //! Modifier pour supprimer le user forcé et mettre wp_current_user
+           
             'userID' => $user,
             'adress1' => $request->get_param('adress1'),
             'adress2' => $request->get_param('adress2'),
