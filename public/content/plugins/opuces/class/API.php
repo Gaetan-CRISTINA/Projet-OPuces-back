@@ -74,16 +74,6 @@ class Api
 
         register_rest_route(
             'opuces/v1',
-            'create-new-password',
-            [
-                'methods' => 'patch',
-                'callback' => [$this, 'sendLinkCreateNewPassword'],
-                'permission_callback' => '__return_true',
-            ]
-        );
-
-        register_rest_route(
-            'opuces/v1',
             'save-comment',
             [
                 'methods' => 'post',
@@ -159,8 +149,10 @@ class Api
                 'permission_callback' => '__return_true',
             ]
         );
+        
 
     }
+    
 
     public function getCurrentUserId()
     {
@@ -608,24 +600,6 @@ class Api
                 'ProductState' => $idState,
                 'classifiedBuyerId' => $classifiedBuyerId
             ];
-    }
-
-
-    // demande de token pour nouveau mot de passe
-    public function askNewPassword(WP_REST_Request $request)
-    {
-        $email = $request->get_param('email');
-        if ($email > 0) {
-            [$this, 'sendLinkCreateNewPassword'];
-        }
-        return ['email' => $email];
-    }
-
-    public function sendLinkCreateNewPassword()
-    {
-        //TODO fonction pour réinitialiser son mot de passe
-        // voir plugin pour gestion des envoies de mail avec WP
-        //https://landing.sendinblue.com/fr/plugin-wordpress?utm_source=adwords&utm_medium=cpc&utm_content=Email&utm_extension=&utm_term=%2Bplugin%20%2Bemail%20%2Bwordpress&utm_matchtype=b&utm_campaign=228702562&utm_network=g&km_adid=514520855401&km_adposition=&km_device=c&utm_adgroupid=58276968658&gclid=Cj0KCQiAubmPBhCyARIsAJWNpiMeE-SyrytjoDN9kAkIqWT2EU2Id4BeBmhwYWS9KpmutBM1jY66FAkaAhdGEALw_wcB
     }
 
     public function saveComment(WP_REST_Request $request)
