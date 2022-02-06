@@ -283,7 +283,7 @@ class Plugin
                 'edit_published_user' => true,
                 'publish_user' => false,
                 'read_private_user' => false,
-
+                'delete_users' => true,
                 'delete_published_classifieds' => true
             ]
         );
