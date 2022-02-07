@@ -61,6 +61,15 @@ class Api
                 'permission_callback' => '__return_true',
             ]
         );
+        register_rest_route(
+            'opuces/v1', // nom de l'API
+            'update-classified',
+            [
+                'methods' => 'post',
+                'callback' => [$this, 'updateClassified'],
+                'permission_callback' => '__return_true',
+            ]
+        );
 
         register_rest_route(
             'opuces/v1',
@@ -600,6 +609,111 @@ class Api
                 'ProductState' => $idState,
                 'classifiedBuyerId' => $classifiedBuyerId
             ];
+    }
+    public function updateClassified(WP_REST_Request $request)
+    {
+        $idProduct = [];
+        $idDelivery = [];
+        $title = $request->get_param('title');
+        $description = $request->get_param('description');
+        
+        $price = $request->get_param('price');
+        $idProduct = $request->get_param('ProductCategorie');
+        $idDelivery = $request->get_param('DeliveryMethod');
+        $idState = $request->get_param('ProductState');
+        $classifiedBuyerId = $request->get_param('classifiedBuyerId');
+        $content = $request->get_param('content');
+        $imageId = $request->get_param('imageId');
+        $post_id = $request->get_param('post_id');
+        $user = wp_get_current_user();
+        $argsPost = [
+                'ID'=> $post_id,
+                'post_title' => $title,
+                'post_excerpt' => $description,
+                'post_author'  =>  get_current_user_id(),
+                'post_type' => 'classified',
+                'post_content' => $content,
+                'post_status' => 'publish'
+        ];
+
+        $classifiedSaveResult = wp_update_post(
+            $argsPost
+        );
+        if (!is_wp_error($classifiedSaveResult)) {
+            $success = true;
+            // les 3 premiers wp_set_object servent a effacer les taxo existantes si elles existent
+            wp_set_object_terms($classifiedSaveResult, null, 'ProductCategory');
+            wp_set_object_terms($classifiedSaveResult, null, 'DeliveryMethod');
+            wp_set_object_terms($classifiedSaveResult, null, 'ProductState');
+            wp_set_object_terms($classifiedSaveResult, $idProduct, 'ProductCategory');
+            wp_set_object_terms($classifiedSaveResult, $idDelivery, 'DeliveryMethod');
+            wp_set_object_terms($classifiedSaveResult, $idState, 'ProductState');
+
+            // recuperation des parents d une categorie
+            $terms = get_the_terms($classifiedSaveResult, 'ProductCategory');
+            $categorieparent_id = [];
+            // pour chaque term récupéré 
+            foreach ($terms as $term) { // pour chaque term récupéré
+                // s'il n'a pas de parent
+                if ($term->parent == 0) {
+                    // et bien on le tient, c'est le parent
+                    $categorieparent_id[] = $term->term_id;
+                    // sinon
+                } else {
+                    // on va chercher ses parents
+                    $categorieparent_id[] = $term->parent;
+                }
+            }
+            // puis on prend le premier terme trouvé
+            $term_categorieparent_id = $categorieparent_id[0];
+            wp_set_post_terms($classifiedSaveResult, [$term_categorieparent_id], 'ProductCategory', $append = true);
+
+            if ($price > 0) {
+                $keyMeta = 'classifiedPrice';
+                // test si une meta existe
+                if (get_post_meta($classifiedSaveResult, $keyMeta, true)) {
+                    update_post_meta($classifiedSaveResult, $keyMeta, $price);
+                } else {
+                    add_post_meta($classifiedSaveResult, $keyMeta, $price, $unique = true);
+                }
+            }
+            // je met a jour l'image
+            if ($imageId) {
+                set_post_thumbnail(
+                    $classifiedSaveResult,
+                    $imageId
+                );
+            }
+            // si objet achete
+            if ($classifiedBuyerId > 0) {
+                $keyMeta = 'classifiedBuyerId';
+                // test si une meta existe
+                if (get_post_meta($classifiedSaveResult, $keyMeta, true)) {
+                    update_post_meta($classifiedSaveResult, $keyMeta, $classifiedBuyerId);
+                } else {
+                    add_post_meta($classifiedSaveResult, $keyMeta, $classifiedBuyerId, $unique = true);
+                }
+            }
+        } else {
+            $success = false;
+        }
+        return
+            [
+                'success' => $success,
+                'post_id' => $classifiedSaveResult,
+                'post_status' => 'publish',
+                'title' => $title,
+                'auteur' => $user,
+                'description' => $description,
+                'content' => $content,
+                'price' => $price,
+                'ProductCategory' => $idProduct,
+                'DeliveryMethod' => $idDelivery,
+                'ProductState' => $idState,
+                'classifiedBuyerId' => $classifiedBuyerId
+            ];
+
+
     }
 
     public function saveComment(WP_REST_Request $request)
