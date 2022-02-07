@@ -79,6 +79,9 @@ class Plugin
             //Todo foreignkey
         $sql = " CREATE TABLE user_table (
                 userID bigint(20) unsigned NOT NULL PRIMARY KEY,
+                civility varchar(16),
+                firstname varchar(50),
+                lastname varchar(50),
                 adress1 varchar(50) ,
                 adress2 varchar(50) ,
                 zipcode int(10) NOT NULL,

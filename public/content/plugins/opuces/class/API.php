@@ -173,7 +173,9 @@ class Api
     public function getTrashedClassifiedsByAuthorId(WP_REST_Request $request)
     {
         global $wpdb;
-        $userID = $request->get_param('userID');
+        
+        $userID = get_current_user_id();
+        
         $table_name = 'wp_posts';
         $trashedClassifieds = $wpdb->get_results($wpdb->prepare("SELECT * FROM `$table_name` WHERE wp_posts.post_status = 'trash' AND wp_posts.post_author = %d", $userID));
         return $trashedClassifieds;
