@@ -180,7 +180,9 @@ class Api
 
     }
 
+
     public function getEmail()
+
     {
         global $wpdb;
         $userID = get_current_user_id();
@@ -189,7 +191,9 @@ class Api
         return $email;
     }
 
+
     public function getTrashedClassifiedsByAuthorId()
+
     {
         global $wpdb;
         
