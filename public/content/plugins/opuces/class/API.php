@@ -208,6 +208,9 @@ class Api
         $data = [
            
             'userID' => $user,
+            'civility' => $request->get_param('civility'),
+            'firstname' => $request->get_param('firstname'),
+            'lastname' => $request->get_param('lastname'),
             'adress1' => $request->get_param('adress1'),
             'adress2' => $request->get_param('adress2'),
             'zipcode' => $request->get_param('zipcode'),
