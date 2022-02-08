@@ -167,10 +167,29 @@ class Api
                 'permission_callback' => '__return_true',
             ]
         );
+        register_rest_route(
+            'opuces/v1',
+            'load-user-email',
+            [
+                'methods' => 'get',
+                'callback' => [$this, 'getEmail'],
+                'permission_callback' => '__return_true',
+            ]
+        );
         
 
     }
-    public function getTrashedClassifiedsByAuthorId(WP_REST_Request $request)
+
+    public function getEmail()
+    {
+        global $wpdb;
+        $userID = get_current_user_id();
+        $table_name = 'wp_users';
+        $email = $wpdb->get_results($wpdb->prepare("SELECT `user_email` FROM `$table_name` WHERE wp_users.ID = %d", $userID));
+        return $email;
+    }
+
+    public function getTrashedClassifiedsByAuthorId()
     {
         global $wpdb;
         
