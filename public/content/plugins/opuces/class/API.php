@@ -160,10 +160,10 @@ class Api
         );
         register_rest_route(
             'opuces/v1',
-            'trashed-classifieds',
+            'classified-sold',
             [
-                'methods' => 'get',
-                'callback' => [$this, 'getTrashedClassifiedsByAuthorId'],
+                'methods' => 'patch',
+                'callback' => [$this, 'updateClassifiedSold'],
                 'permission_callback' => '__return_true',
             ]
         );
@@ -192,16 +192,14 @@ class Api
     }
 
 
-    public function getTrashedClassifiedsByAuthorId()
+    public function updateClassifiedSold(WP_REST_Request $request)
 
     {
         global $wpdb;
-        
-        $userID = get_current_user_id();
-        
-        $table_name = 'wp_posts';
-        $trashedClassifieds = $wpdb->get_results($wpdb->prepare("SELECT * FROM `$table_name` WHERE wp_posts.post_status = 'trash' AND wp_posts.post_author = %d", $userID));
-        return $trashedClassifieds;
+        $classifiedID = $request->get_param('classifiedId');
+        $classifiedSold = $wpdb->get_results($wpdb->prepare("UPDATE wp_posts SET post_status = 'sold' WHERE ID = %d" , $classifiedID));
+        var_dump($classifiedSold);
+        return true;
     }
 
     public function getCurrentUserId()
