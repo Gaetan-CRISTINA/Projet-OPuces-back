@@ -16,10 +16,6 @@ class Plugin
         );
         add_action(
             'init',
-            [$this, 'createUserInfoCustomTable']
-        );
-        add_action(
-            'init',
             [$this,  'createProductStateCustomTaxonomy']
         );
         add_action(
@@ -265,6 +261,8 @@ class Plugin
         $this->addCapAdmin(['classified']);
         $this->registerUserRole();
         $this->registerPostStatus();
+        $this->createUserInfoCustomTable();
+
     }
     public function registerUserRole()
     {
