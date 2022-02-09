@@ -78,7 +78,7 @@ class Plugin
     public function createUserInfoCustomTable(){
             //Todo foreignkey
         $sql = " CREATE TABLE user_table (
-                userID bigint(20) unsigned NOT NULL PRIMARY KEY,
+                
                 civility varchar(16),
                 firstname varchar(50),
                 lastname varchar(50),
@@ -92,7 +92,8 @@ class Plugin
                 phone_number bigint(16) ,
                 rate tinyint(1) ,
                 created_at datetime NOT NULL ON UPDATE CURRENT_TIMESTAMP,
-                updated_at datetime NULL
+                updated_at datetime NULL,
+                userID bigint(20) unsigned NOT NULL PRIMARY KEY
                 );
             ";
                 // wp_users_id bigint(24),
