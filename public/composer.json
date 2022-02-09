@@ -63,5 +63,11 @@
             "wp plugin install custom-post-type-ui --activate",
             "wp plugin install acf-to-rest-api --activate"
         ]
+    },
+    "config": {
+        "allow-plugins": {
+            "johnpbloch/wordpress-core-installer": true,
+            "composer/installers": true
+        }
     }
 }
