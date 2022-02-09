@@ -89,7 +89,7 @@ class Plugin
                 rate tinyint(1) ,
                 created_at datetime NOT NULL ON UPDATE CURRENT_TIMESTAMP,
                 updated_at datetime NULL,
-                userID bigint(20) unsigned NOT NULL PRIMARY KEY
+                userID bigint(20) unsigned NOT NULL PRIMARY KEY  (id)
                 );
             ";
                 // wp_users_id bigint(24),
