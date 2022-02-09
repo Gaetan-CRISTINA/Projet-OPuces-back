@@ -198,7 +198,8 @@ class Api
         global $wpdb;
         $classifiedID = $request->get_param('classifiedId');
         $classifiedSold = $wpdb->get_results($wpdb->prepare("UPDATE wp_posts SET post_status = 'sold' WHERE ID = %d" , $classifiedID));
-        return $classifiedSold;
+        var_dump($classifiedSold);
+        return true;
     }
 
     public function getCurrentUserId()
