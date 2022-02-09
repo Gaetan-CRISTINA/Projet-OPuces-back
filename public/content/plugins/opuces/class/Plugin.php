@@ -78,7 +78,6 @@ class Plugin
     public function createUserInfoCustomTable(){
             //Todo foreignkey
         $sql = " CREATE TABLE user_table (
-                
                 civility varchar(16),
                 firstname varchar(50),
                 lastname varchar(50),
