@@ -377,6 +377,7 @@ class Api
         wp_posts.post_type = 'classified' 
         AND wp_posts.post_status = 'publish' 
         And wp_term_taxonomy.taxonomy = 'ProductCategory'
+        AND wp_postmeta.meta_key = 'classifiedPrice'
                   ";
         $superWhere = $wpdb->prepare($where);
         $superFrom = $wpdb->prepare($from);
