@@ -176,7 +176,15 @@ class Api
                 'permission_callback' => '__return_true',
             ]
         );
-        
+        register_rest_route(
+            'opuces/v1',
+            'geturlimage',
+            [
+                'methods' => 'get',
+                'callback' => [$this, 'getUrlImage'],
+                'permission_callback' => '__return_true',
+            ]
+        );        
 
     }
 
@@ -341,6 +349,21 @@ class Api
         $sql = ("SELECT * FROM `wp_terms`");
         $resultQueryTaxonomy = $wpdb->get_results($wpdb->prepare($sql));
         return [$resultQueryTaxonomy];
+               
+    }
+/**
+     * getUrlImage
+     *  recup url image associée a un post
+     * $request: {"postID"}
+     * return: {[url]}
+     * 
+     */
+    public function getUrlImage(WP_REST_Request $request)
+    {
+        $id = $request->get_param('id');
+        $imageID = get_post_thumbnail_id($id);
+        $urlImage = wp_get_attachment_image_src($imageID, 'full');
+        return [$urlImage];
                
     }
 
@@ -841,4 +864,12 @@ class Api
 
         return ['status' => 'failed'];
     }
+
+        /**
+         * Get the value of imageID
+         */ 
+        public function getImageID()
+        {
+                return $this->imageID;
+        }
 }
