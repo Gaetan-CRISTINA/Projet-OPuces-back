@@ -1,0 +1,13 @@
+vendor
+composer.lock
+wp
+wp-config.php
+.htaccess
+
+content/*
+!content/
+
+content/themes/*
+!content/themes/opuces
+content/plugins/*
+!content/plugins/opuces
